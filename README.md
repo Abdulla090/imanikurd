@@ -1,73 +1,43 @@
-# Welcome to your Lovable project
+# ئیمانی کورد
 
-## Project info
+ئەپلیکەیشنێکی وێبی ئیسلامی بۆ کوردەکان بە زمانی سۆرانی.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+## تایبەتمەندییەکان
 
-## How can I edit this code?
+- قورئانی پیرۆز لەگەڵ تەفسیری کوردی (١٣ تەفسیری جیاواز)
+- گوێگرتن لە قورئان بە دەنگی قاری جیاواز (پێشەوا قادر و قارییە عەرەبییەکان)
+- کاتەکانی نوێژ بۆ شارەکانی کوردستان
+- ئاراستەی قیبلە
+- ئەزکار و دوعاکان
+- فێربوونی ئەسمائولحسنا (٩٩ ناوی خودا)
+- زانیاری دەربارەی صەحابەکان
+- حەدیسەکان بە کوردی
+- تەسبیح دیجیتاڵی
+- حیسابکردنی زەکات
 
-There are several ways of editing your application.
-
-**Use Lovable**
-
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
+## دامەزراندن
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+git clone https://github.com/Abdulla090/imanikurd.git
+cd imanikurd
+npm install
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+## سەرچاوەی دەنگ
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+دەنگی قورئان لەم سەرچاوانەوە دێت:
+- پێشەوا قادر (کوردی) - GitHub
+- قارییە عەرەبییەکان - mp3quran.net
 
-**Use GitHub Codespaces**
+## تەکنەلۆژیا
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
 - React
-- shadcn-ui
+- TypeScript
+- Vite
 - Tailwind CSS
+- shadcn/ui
 
-## How can I deploy this project?
+## مۆڵەت
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+سەرچاوە کراوەیە بۆ بەکارهێنانی فێربوونی و ئایینی.
