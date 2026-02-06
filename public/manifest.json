@@ -1,0 +1,41 @@
+{
+    "name": "ئیمان - کۆمەڵگەی ئیسلامی",
+    "short_name": "ئیمان",
+    "description": "پلاتفۆرمێکی تەواو بۆ خوێندنەوەی قورئانی پیرۆز، حەدیس، و ئەزکار",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#0a2618",
+    "theme_color": "#166534",
+    "orientation": "portrait-primary",
+    "dir": "rtl",
+    "lang": "ku",
+    "icons": [
+        {
+            "src": "/favicon.ico",
+            "sizes": "48x48",
+            "type": "image/x-icon"
+        }
+    ],
+    "categories": [
+        "education",
+        "lifestyle",
+        "books"
+    ],
+    "shortcuts": [
+        {
+            "name": "قورئان",
+            "url": "/quran",
+            "description": "خوێندنەوەی قورئانی پیرۆز"
+        },
+        {
+            "name": "ئەزکار",
+            "url": "/azkar",
+            "description": "ئەزکاری بەیانی و ئێوارە"
+        },
+        {
+            "name": "تەسبیح",
+            "url": "/tasbih",
+            "description": "ژمێرەری تەسبیح"
+        }
+    ]
+}

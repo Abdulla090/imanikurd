@@ -1,0 +1,374 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Islamic-inspired Dark Green Theme - Light Mode */
+    --background: 150 20% 97%;
+    --foreground: 150 50% 10%;
+
+    --card: 150 18% 95%;
+    --card-foreground: 150 50% 10%;
+
+    --popover: 150 18% 95%;
+    --popover-foreground: 150 50% 10%;
+
+    /* Deep Forest Green - Primary */
+    --primary: 150 60% 22%;
+    --primary-foreground: 150 20% 98%;
+
+    --secondary: 150 25% 90%;
+    --secondary-foreground: 150 60% 20%;
+
+    --muted: 150 20% 92%;
+    --muted-foreground: 150 30% 40%;
+
+    /* Dark Green Accent (no gold) */
+    --accent: 155 55% 28%;
+    --accent-foreground: 150 20% 98%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 150 20% 85%;
+    --input: 150 20% 85%;
+    --ring: 150 60% 22%;
+
+    --radius: 1rem;
+
+    /* Custom tokens - All Dark Green */
+    --emerald-deep: 150 60% 22%;
+    --emerald-light: 150 50% 30%;
+    --gold: 150 55% 28%;
+    --gold-light: 150 45% 35%;
+    --ivory: 150 20% 97%;
+    --ivory-dark: 150 18% 92%;
+
+    /* Glass effect - Green tinted */
+    --glass-bg: hsla(150, 20%, 97%, 0.9);
+    --glass-border: hsla(150, 40%, 60%, 0.3);
+
+    /* Shadows - Dark green tinted */
+    --shadow-soft: 0 4px 24px hsla(150, 60%, 20%, 0.12);
+    --shadow-glow: 0 0 40px hsla(150, 60%, 25%, 0.2);
+
+    --sidebar-background: 150 20% 98%;
+    --sidebar-foreground: 150 40% 20%;
+    --sidebar-primary: 150 60% 22%;
+    --sidebar-primary-foreground: 150 20% 98%;
+    --sidebar-accent: 150 20% 94%;
+    --sidebar-accent-foreground: 150 50% 15%;
+    --sidebar-border: 150 15% 88%;
+    --sidebar-ring: 150 60% 22%;
+  }
+
+  .dark {
+    /* Dark Mode - Deep Forest Green */
+    --background: 150 40% 5%;
+    --foreground: 150 15% 92%;
+
+    --card: 150 35% 8%;
+    --card-foreground: 150 15% 92%;
+
+    --popover: 150 35% 8%;
+    --popover-foreground: 150 15% 92%;
+
+    /* Brighter Dark Green for visibility */
+    --primary: 150 50% 40%;
+    --primary-foreground: 150 40% 5%;
+
+    --secondary: 150 30% 12%;
+    --secondary-foreground: 150 15% 88%;
+
+    --muted: 150 28% 12%;
+    --muted-foreground: 150 18% 55%;
+
+    /* Dark Green Accent */
+    --accent: 155 45% 35%;
+    --accent-foreground: 150 40% 5%;
+
+    --border: 150 28% 15%;
+    --input: 150 28% 15%;
+    --ring: 150 50% 40%;
+
+    /* Dark mode custom tokens - All green */
+    --emerald-deep: 150 50% 38%;
+    --emerald-light: 150 45% 45%;
+    --gold: 155 45% 35%;
+    --gold-light: 155 40% 42%;
+
+    /* Glass effect - Dark green */
+    --glass-bg: hsla(150, 40%, 6%, 0.92);
+    --glass-border: hsla(150, 40%, 25%, 0.35);
+
+    /* Shadows */
+    --shadow-soft: 0 4px 24px hsla(0, 0%, 0%, 0.5);
+    --shadow-glow: 0 0 50px hsla(150, 55%, 35%, 0.22);
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    direction: rtl;
+    scroll-behavior: smooth;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: 'Noto Sans Arabic', 'Noto Naskh Arabic', sans-serif;
+    overflow-x: hidden;
+  }
+
+  /* Better focus states for accessibility */
+  :focus-visible {
+    @apply outline-none ring-2 ring-primary ring-offset-2 ring-offset-background;
+  }
+
+  /* Smooth page transitions */
+  main {
+    animation: fadeIn 0.3s ease-out;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: 'Noto Naskh Arabic', 'Amiri', serif;
+  }
+
+  /* Better touch targets for mobile */
+  button,
+  a,
+  [role="button"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Selection color */
+  ::selection {
+    background: hsl(var(--primary) / 0.3);
+    color: hsl(var(--foreground));
+  }
+}
+
+@layer components {
+  .font-arabic {
+    font-family: 'Amiri', 'Noto Naskh Arabic', serif;
+  }
+
+  .font-kurdish {
+    font-family: 'Noto Sans Arabic', sans-serif;
+  }
+
+  /* Glass morphism card */
+  .glass-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--shadow-soft);
+  }
+
+  /* Islamic geometric pattern overlay */
+  .pattern-islamic {
+    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23065f46' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  }
+
+  /* Feature card */
+  .feature-card {
+    @apply relative p-6 rounded-2xl transition-all duration-300 cursor-pointer;
+    background: var(--glass-bg);
+    backdrop-filter: blur(15px);
+    border: 1px solid var(--glass-border);
+  }
+
+  .feature-card:hover {
+    @apply -translate-y-1;
+    box-shadow: var(--shadow-soft);
+  }
+
+  /* Prayer card */
+  .prayer-card {
+    @apply relative overflow-hidden rounded-xl p-6 transition-all duration-500;
+    background: var(--glass-bg);
+    backdrop-filter: blur(15px);
+    border: 1px solid var(--glass-border);
+  }
+
+  .prayer-card.active {
+    background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--emerald-light)));
+    color: hsl(var(--primary-foreground));
+    box-shadow: var(--shadow-glow);
+  }
+
+  /* Nav link */
+  .nav-link {
+    @apply flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300;
+  }
+
+  .nav-link:hover {
+    @apply bg-muted;
+  }
+
+  .nav-link.active {
+    @apply bg-primary text-primary-foreground;
+  }
+
+  /* Stat card */
+  .stat-card {
+    @apply text-center;
+  }
+
+  .stat-number {
+    @apply text-4xl font-bold text-primary font-arabic;
+  }
+
+  .stat-label {
+    @apply text-sm text-muted-foreground mt-1;
+  }
+
+  /* Daily verse */
+  .verse-card {
+    @apply relative p-8 rounded-2xl text-center;
+    background: var(--glass-bg);
+    backdrop-filter: blur(15px);
+    border: 1px solid var(--glass-border);
+  }
+
+  /* Ayat container */
+  .ayat-container {
+    @apply relative p-8 rounded-2xl;
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+  }
+
+  .ayat-container::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 2px;
+    background: linear-gradient(135deg, hsl(var(--primary) / 0.2), hsl(var(--accent) / 0.2));
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  /* Custom scrollbar */
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: hsl(var(--muted));
+    border-radius: 3px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: hsl(var(--primary) / 0.3);
+    border-radius: 3px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--primary) / 0.5);
+  }
+
+  /* Responsive container - uses more width on mobile */
+  .container-responsive {
+    @apply w-full px-3 sm:px-4 md:px-6 mx-auto;
+  }
+
+  /* Mobile-optimized content widths */
+  .content-width-full {
+    @apply w-full max-w-none sm:max-w-xl md:max-w-2xl lg:max-w-4xl xl:max-w-5xl mx-auto;
+  }
+
+  .content-width-medium {
+    @apply w-full max-w-none sm:max-w-lg md:max-w-xl lg:max-w-2xl mx-auto;
+  }
+
+  .content-width-small {
+    @apply w-full max-w-none sm:max-w-md md:max-w-lg mx-auto;
+  }
+}
+
+/* Chat Message Formatting Styles */
+.chat-content {
+  line-height: 1.8;
+  font-size: 14px;
+}
+
+.chat-paragraph {
+  margin: 0 0 12px 0;
+}
+
+.chat-heading {
+  color: hsl(var(--primary));
+  font-weight: 700;
+  margin: 16px 0 10px 0;
+}
+
+h2.chat-heading {
+  font-size: 18px;
+}
+
+h3.chat-heading {
+  font-size: 16px;
+}
+
+h4.chat-heading {
+  font-size: 15px;
+}
+
+.chat-bold {
+  color: hsl(var(--primary));
+  font-weight: 700;
+}
+
+.chat-verse {
+  background: hsl(var(--primary) / 0.15);
+  color: hsl(var(--primary));
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.chat-list {
+  list-style-type: disc;
+  margin: 12px 0;
+  padding-right: 24px;
+}
+
+.chat-list li {
+  margin: 6px 0;
+  padding-right: 8px;
+}
