@@ -1,6 +1,6 @@
 import { useState, useEffect, memo, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Sun, Sunrise, Moon, CloudSun, Sunset, Clock, MapPin, RefreshCw, ChevronDown, X, Building2, Search } from "lucide-react";
+import { Sun, Sunrise, Moon, CloudSun, Sunset, Clock, MapPin, RefreshCw, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, X, Building2, Search, Calendar } from "lucide-react";
 import { usePrayerTimes } from "@/hooks/usePrayerTimes";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -191,6 +191,7 @@ export function PrayerTimesCard() {
     location,
     getNextPrayer,
     getTimeUntilNextPrayer,
+    getMonthlyPrayerTimes,
     getCityName,
     refetch,
     setSelectedCity,
@@ -200,14 +201,29 @@ export function PrayerTimesCard() {
   const nextPrayer = getNextPrayer();
   const [timeLeft, setTimeLeft] = useState(getTimeUntilNextPrayer());
   const [showCitySelector, setShowCitySelector] = useState(false);
+  const [showMonthlyView, setShowMonthlyView] = useState(false);
+  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
+  const [selectedYear] = useState(new Date().getFullYear());
 
-  // Update countdown
+  // Get monthly prayer times
+  const monthlyData = useMemo(() => {
+    return getMonthlyPrayerTimes(selectedMonth, selectedYear);
+  }, [selectedMonth, selectedYear, getMonthlyPrayerTimes]);
+
+  // Update countdown immediately and every minute
   useEffect(() => {
+    // Update immediately when prayer times load
+    if (prayerTimes) {
+      setTimeLeft(getTimeUntilNextPrayer());
+    }
+
+    // Then update every minute
     const interval = setInterval(() => {
       setTimeLeft(getTimeUntilNextPrayer());
-    }, 60000);
+    }, 60000); // Every minute
+
     return () => clearInterval(interval);
-  }, [getTimeUntilNextPrayer]);
+  }, [getTimeUntilNextPrayer, prayerTimes]);
 
   const handleSelectCity = (city: string) => {
     setSelectedCity(city);
@@ -343,6 +359,145 @@ export function PrayerTimesCard() {
             />
           ))}
         </div>
+
+        {/* Monthly View Toggle */}
+        <button
+          onClick={() => setShowMonthlyView(!showMonthlyView)}
+          className="w-full mt-6 flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-primary/5 hover:bg-primary/10 transition-all border border-primary/10"
+        >
+          <Calendar className="w-5 h-5 text-primary" />
+          <span className="font-medium text-foreground">
+            {showMonthlyView ? "داخستنی ڕووژمێری مانگانە" : "بینینی تەواوی مانگ"}
+          </span>
+          {showMonthlyView ? (
+            <ChevronUp className="w-4 h-4 text-primary" />
+          ) : (
+            <ChevronDown className="w-4 h-4 text-primary" />
+          )}
+        </button>
+
+        {/* Monthly Calendar View */}
+        <AnimatePresence>
+          {showMonthlyView && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.3 }}
+              className="overflow-hidden"
+            >
+              <div className="mt-4 glass-card rounded-2xl p-4 sm:p-6">
+                {/* Month Navigation */}
+                <div className="flex items-center justify-between mb-4">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setSelectedMonth(prev => prev > 1 ? prev - 1 : 12)}
+                    className="h-10 w-10"
+                  >
+                    <ChevronRight className="w-5 h-5" />
+                  </Button>
+
+                  <h3 className="text-lg font-bold text-foreground">
+                    {new Date(selectedYear, selectedMonth - 1).toLocaleDateString('ar-IQ', { month: 'long' })} {selectedYear}
+                  </h3>
+
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setSelectedMonth(prev => prev < 12 ? prev + 1 : 1)}
+                    className="h-10 w-10"
+                  >
+                    <ChevronLeft className="w-5 h-5" />
+                  </Button>
+                </div>
+
+                {/* Prayer Times Table */}
+                <div className="overflow-x-auto -mx-4 sm:mx-0">
+                  <table className="w-full min-w-[600px] text-sm">
+                    <thead>
+                      <tr className="border-b border-border">
+                        <th className="py-3 px-2 text-right font-bold text-muted-foreground">ڕۆژ</th>
+                        <th className="py-3 px-2 text-center font-bold text-muted-foreground">
+                          <div className="flex flex-col items-center gap-1">
+                            <Moon className="w-4 h-4" />
+                            <span className="text-xs">بەیانی</span>
+                          </div>
+                        </th>
+                        <th className="py-3 px-2 text-center font-bold text-muted-foreground">
+                          <div className="flex flex-col items-center gap-1">
+                            <Sunrise className="w-4 h-4" />
+                            <span className="text-xs">خۆرهەڵات</span>
+                          </div>
+                        </th>
+                        <th className="py-3 px-2 text-center font-bold text-muted-foreground">
+                          <div className="flex flex-col items-center gap-1">
+                            <Sun className="w-4 h-4" />
+                            <span className="text-xs">نیوەڕۆ</span>
+                          </div>
+                        </th>
+                        <th className="py-3 px-2 text-center font-bold text-muted-foreground">
+                          <div className="flex flex-col items-center gap-1">
+                            <CloudSun className="w-4 h-4" />
+                            <span className="text-xs">ئێوارە</span>
+                          </div>
+                        </th>
+                        <th className="py-3 px-2 text-center font-bold text-muted-foreground">
+                          <div className="flex flex-col items-center gap-1">
+                            <Sunset className="w-4 h-4" />
+                            <span className="text-xs">ڕۆژئاوا</span>
+                          </div>
+                        </th>
+                        <th className="py-3 px-2 text-center font-bold text-muted-foreground">
+                          <div className="flex flex-col items-center gap-1">
+                            <Moon className="w-4 h-4" />
+                            <span className="text-xs">خەوتن</span>
+                          </div>
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {monthlyData.map((dayData, index) => {
+                        const isToday = dayData.day === new Date().getDate() &&
+                          dayData.month === new Date().getMonth() + 1;
+                        return (
+                          <tr
+                            key={index}
+                            className={cn(
+                              "border-b border-border/50 transition-colors",
+                              isToday ? "bg-primary/10 font-bold" : "hover:bg-muted/50"
+                            )}
+                          >
+                            <td className="py-2.5 px-2 text-right">
+                              <span className={cn(
+                                "inline-flex items-center justify-center w-8 h-8 rounded-full",
+                                isToday ? "bg-primary text-primary-foreground" : ""
+                              )}>
+                                {dayData.day}
+                              </span>
+                            </td>
+                            <td className="py-2.5 px-2 text-center font-mono text-xs sm:text-sm">{dayData.timings.Fajr}</td>
+                            <td className="py-2.5 px-2 text-center font-mono text-xs sm:text-sm">{dayData.timings.Sunrise}</td>
+                            <td className="py-2.5 px-2 text-center font-mono text-xs sm:text-sm">{dayData.timings.Dhuhr}</td>
+                            <td className="py-2.5 px-2 text-center font-mono text-xs sm:text-sm">{dayData.timings.Asr}</td>
+                            <td className="py-2.5 px-2 text-center font-mono text-xs sm:text-sm">{dayData.timings.Maghrib}</td>
+                            <td className="py-2.5 px-2 text-center font-mono text-xs sm:text-sm">{dayData.timings.Isha}</td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+
+                {monthlyData.length === 0 && (
+                  <div className="text-center py-8 text-muted-foreground">
+                    داتای ئەم مانگە بەردەست نییە
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </>
   );

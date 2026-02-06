@@ -216,10 +216,24 @@ export function usePrayerTimes() {
     }
   }, []);
 
+  // Helper: Parse time string "HH:MM" to minutes since midnight
+  const parseTimeToMinutes = (timeStr: string): number => {
+    if (!timeStr) return 0;
+    // Handle formats like "05:30", "05:30 (EET)", etc.
+    const cleaned = timeStr.split(' ')[0].trim();
+    const parts = cleaned.split(':');
+    if (parts.length < 2) return 0;
+    const h = parseInt(parts[0], 10);
+    const m = parseInt(parts[1], 10);
+    if (isNaN(h) || isNaN(m)) return 0;
+    return h * 60 + m;
+  };
+
   // Helper functions used by UI
   const getNextPrayer = (): { name: string; time: string } | null => {
-    if (!prayerTimes) return null;
-    const list = [
+    if (!prayerTimes?.timings) return null;
+
+    const prayers = [
       { name: "Fajr", time: prayerTimes.timings.Fajr },
       { name: "Sunrise", time: prayerTimes.timings.Sunrise },
       { name: "Dhuhr", time: prayerTimes.timings.Dhuhr },
@@ -227,35 +241,74 @@ export function usePrayerTimes() {
       { name: "Maghrib", time: prayerTimes.timings.Maghrib },
       { name: "Isha", time: prayerTimes.timings.Isha },
     ];
-    // ... same logic as before ...
+
     const now = new Date();
     const currentMins = now.getHours() * 60 + now.getMinutes();
 
-    for (const p of list) {
-      // Time format might be "05:30 (EET)" or just "05:30"
-      const [h, m] = p.time.split(':').map(val => parseInt(val));
-      const pMins = h * 60 + m;
-      if (pMins > currentMins) return p;
+    // Find next prayer that hasn't passed yet
+    for (const prayer of prayers) {
+      const prayerMins = parseTimeToMinutes(prayer.time);
+      if (prayerMins > currentMins) {
+        return prayer;
+      }
     }
-    return list[0]; // Next day Fajr
+
+    // All prayers have passed today, return Fajr (next day)
+    return prayers[0];
   };
 
-  const getTimeUntilNextPrayer = () => {
-    // ... same logic as before ...
+  const getTimeUntilNextPrayer = (): { hours: number; minutes: number } => {
     const next = getNextPrayer();
     if (!next) return { hours: 0, minutes: 0 };
 
     const now = new Date();
     const currentMins = now.getHours() * 60 + now.getMinutes();
-    const [h, m] = next.time.split(':').map(val => parseInt(val));
-    let pMins = h * 60 + m;
+    let prayerMins = parseTimeToMinutes(next.time);
 
-    if (pMins <= currentMins) pMins += 24 * 60; // Tomorrow
+    // If prayer time has passed (next day's prayer), add 24 hours
+    if (prayerMins <= currentMins) {
+      prayerMins += 24 * 60; // Add 1440 minutes (24 hours)
+    }
 
-    const diff = pMins - currentMins;
-    return { hours: Math.floor(diff / 60), minutes: diff % 60 };
+    const diff = prayerMins - currentMins;
+    return {
+      hours: Math.floor(diff / 60),
+      minutes: diff % 60
+    };
   };
 
+  // Get all prayer times for a specific month
+  const getMonthlyPrayerTimes = (month?: number, year?: number) => {
+    const targetMonth = month ?? new Date().getMonth() + 1;
+    const targetYear = year ?? new Date().getFullYear();
+    const cityKey = selectedCity || (location ? getCityName(location.lat, location.lng) : "Hawler");
+
+    const dbData = prayerData as FullPrayerData;
+    const cityDailyRecords = dbData[cityKey] || dbData['Hawler'] || [];
+
+    // Filter records for the target month
+    const monthRecords = cityDailyRecords.filter(record => {
+      const [mm] = record.date.split('-').map(Number);
+      return mm === targetMonth;
+    }).map(record => {
+      const [mm, dd] = record.date.split('-').map(Number);
+      return {
+        date: new Date(targetYear, mm - 1, dd),
+        day: dd,
+        month: mm,
+        timings: {
+          Fajr: record.fajr,
+          Sunrise: record.sunrise,
+          Dhuhr: record.dhuhr,
+          Asr: record.asr,
+          Maghrib: record.maghrib,
+          Isha: record.isha
+        }
+      };
+    });
+
+    return monthRecords.sort((a, b) => a.day - b.day);
+  };
 
   // Public API
   return {
@@ -265,6 +318,7 @@ export function usePrayerTimes() {
     location,
     getNextPrayer,
     getTimeUntilNextPrayer,
+    getMonthlyPrayerTimes,
     getCityName: (lat: number, lng: number) => {
       const key = getCityName(lat, lng);
       // Map key to Kurdish display name
