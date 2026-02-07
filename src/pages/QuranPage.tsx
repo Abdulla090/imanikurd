@@ -1,11 +1,11 @@
 import { useState, useEffect, useMemo, useRef } from "react";
 import { motion } from "framer-motion";
-import { BookOpen, Loader2 } from "lucide-react";
+import { BookOpen, Loader2, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Navigation } from "@/components/Navigation";
 import { GeometricPattern } from "@/components/GeometricPattern";
 import { toast } from "sonner";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 
 // Import Quran components
 import {
@@ -20,7 +20,8 @@ import {
   QuranBookView,
   QuranCardView,
   QuranListView,
-  AudioPlayer
+  AudioPlayer,
+  QuranSettings
 } from "@/components/quran";
 
 export default function QuranPage() {
@@ -385,7 +386,7 @@ export default function QuranPage() {
       <GeometricPattern />
       <Navigation />
 
-      <main className="relative z-10 pt-20 sm:pt-24 pb-32 sm:pb-40 px-2 sm:px-4 md:px-6">
+      <main className="relative z-10 pt-20 sm:pt-24 pb-20 sm:pb-24 px-2 sm:px-4 md:px-6">
         <div className="w-full max-w-5xl mx-auto">
           {showSurahList ? (
             <SurahList
@@ -400,49 +401,34 @@ export default function QuranPage() {
           ) : (
             <div>
               {/* Reading View Controls */}
-              <div className="flex items-center justify-between mb-4 gap-4 flex-wrap sticky top-20 z-20 bg-background/80 backdrop-blur pb-2">
+              <div className="flex items-center justify-between mb-4 gap-4 sticky top-20 z-20 bg-background/80 backdrop-blur pb-2">
                 <Button variant="ghost" onClick={() => setShowSurahList(true)} className="gap-2">
                   <BookOpen className="w-4 h-4" />
                   لیست
                 </Button>
 
-                <div className="flex items-center gap-2">
-                  <Select value={selectedTafsir} onValueChange={setSelectedTafsir}>
-                    <SelectTrigger className="w-[140px] h-8 text-xs">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {TAFSIR_OPTIONS.map((opt) => (
-                        <SelectItem key={opt.id} value={opt.id} className="text-xs">{opt.name}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-
-                  <Button
-                    variant={viewMode === "card" ? "default" : "outline"}
-                    size="sm"
-                    className="h-8"
-                    onClick={() => setViewMode("card")}
-                  >
-                    کارت
-                  </Button>
-                  <Button
-                    variant={viewMode === "list" ? "default" : "outline"}
-                    size="sm"
-                    className="h-8"
-                    onClick={() => setViewMode("list")}
-                  >
-                    لیست
-                  </Button>
-                  <Button
-                    variant={viewMode === "book" ? "default" : "outline"}
-                    size="sm"
-                    className="h-8"
-                    onClick={() => setViewMode("book")}
-                  >
-                    کتێب
-                  </Button>
-                </div>
+                <Sheet>
+                  <SheetTrigger asChild>
+                    <Button variant="outline" size="icon">
+                      <Settings className="w-4 h-4" />
+                    </Button>
+                  </SheetTrigger>
+                  <SheetContent side="left" className="w-[300px] sm:w-[400px]">
+                    <SheetHeader>
+                      <SheetTitle className="text-right">ڕێکخستنەکان</SheetTitle>
+                    </SheetHeader>
+                    <QuranSettings
+                      viewMode={viewMode}
+                      setViewMode={setViewMode}
+                      selectedTafsir={selectedTafsir}
+                      setSelectedTafsir={setSelectedTafsir}
+                      selectedQari={selectedQari}
+                      setSelectedQari={setSelectedQari}
+                      showTafsir={showTafsir}
+                      setShowTafsir={setShowTafsir}
+                    />
+                  </SheetContent>
+                </Sheet>
               </div>
 
               {loading ? (
@@ -497,7 +483,6 @@ export default function QuranPage() {
                       audioRef={audioRef}
                       selectedSurah={selectedSurah}
                       selectedQari={selectedQari}
-                      setSelectedQari={setSelectedQari}
                       isPlaying={isPlaying}
                       audioLoading={audioLoading}
                       audioCurrentTime={audioCurrentTime}
