@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { Book, ScrollText, FileText, ListChecks, GraduationCap, Sparkles, Star, RefreshCw, Clock, MessageCircle, Moon, Circle } from "lucide-react";
+import { Book, ScrollText, FileText, ListChecks, GraduationCap, Sparkles, Star, RefreshCw, Clock, MessageCircle, Moon, Circle, BookOpen, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Navigation } from "@/components/Navigation";
 import { GeometricPattern } from "@/components/GeometricPattern";
@@ -300,6 +300,28 @@ export default function Index() {
                 <div className="absolute inset-0 bg-white/5 opacity-0 group-active:opacity-100 transition-opacity" />
               </Link>
 
+              {/* Seerah Card */}
+              <Link
+                to="/seerah"
+                className="relative overflow-hidden rounded-3xl h-36 group"
+              >
+                <div className="absolute inset-0 bg-gradient-to-br from-emerald-900/90 to-teal-800/80" />
+                <div className="absolute bottom-0 left-0 w-20 h-20 bg-emerald-400/20 rounded-full blur-xl translate-y-1/2" />
+
+                <div className="relative z-10 h-full p-4 flex flex-col justify-between">
+                  <div className="w-9 h-9 rounded-xl bg-white/10 backdrop-blur-sm flex items-center justify-center">
+                    <BookOpen className="w-4 h-4 text-white" />
+                  </div>
+
+                  <div>
+                    <p className="text-xs text-white/80 font-medium">سیرەی پێغەمبەر</p>
+                    <p className="text-[10px] text-white/50">ژیاننامە</p>
+                  </div>
+                </div>
+
+                <div className="absolute inset-0 bg-white/5 opacity-0 group-active:opacity-100 transition-opacity" />
+              </Link>
+
               {/* Names of Allah Card */}
               <Link
                 to="/names"
@@ -452,9 +474,9 @@ export default function Index() {
 
               </div>
 
-              {/* Second Row of Grid - 4 Columns */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mt-4">
-                <motion.div whileHover={{ y: -5 }} className="p-6 rounded-3xl glass-card border-none bg-card/50 flex flex-col items-center text-center">
+              {/* Second Row of Grid - 5 Columns */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4 mt-4">
+                <motion.div whileHover={{ y: -5 }} className="relative p-6 rounded-3xl glass-card border-none bg-card/50 flex flex-col items-center text-center">
                   <div className="w-12 h-12 rounded-full bg-green-100 dark:bg-green-900/20 text-green-600 flex items-center justify-center mb-3">
                     <ListChecks className="w-6 h-6" />
                   </div>
@@ -463,7 +485,7 @@ export default function Index() {
                   <Link to="/tracker" className="absolute inset-0" aria-label="Tracker" />
                 </motion.div>
 
-                <motion.div whileHover={{ y: -5 }} className="p-6 rounded-3xl glass-card border-none bg-card/50 flex flex-col items-center text-center">
+                <motion.div whileHover={{ y: -5 }} className="relative p-6 rounded-3xl glass-card border-none bg-card/50 flex flex-col items-center text-center">
                   <div className="w-12 h-12 rounded-full bg-amber-100 dark:bg-amber-900/20 text-amber-600 flex items-center justify-center mb-3">
                     <Circle className="w-6 h-6" />
                   </div>
@@ -472,7 +494,7 @@ export default function Index() {
                   <Link to="/tasbih" className="absolute inset-0" aria-label="Tasbih" />
                 </motion.div>
 
-                <motion.div whileHover={{ y: -5 }} className="p-6 rounded-3xl glass-card border-none bg-card/50 flex flex-col items-center text-center">
+                <motion.div whileHover={{ y: -5 }} className="relative p-6 rounded-3xl glass-card border-none bg-card/50 flex flex-col items-center text-center">
                   <div className="w-12 h-12 rounded-full bg-rose-100 dark:bg-rose-900/20 text-rose-600 flex items-center justify-center mb-3">
                     <Moon className="w-6 h-6" />
                   </div>
@@ -481,13 +503,22 @@ export default function Index() {
                   <Link to="/azkar" className="absolute inset-0" aria-label="Azkar" />
                 </motion.div>
 
-                <motion.div whileHover={{ y: -5 }} className="p-6 rounded-3xl glass-card border-none bg-card/50 flex flex-col items-center text-center">
+                <motion.div whileHover={{ y: -5 }} className="relative p-6 rounded-3xl glass-card border-none bg-card/50 flex flex-col items-center text-center">
                   <div className="w-12 h-12 rounded-full bg-teal-100 dark:bg-teal-900/20 text-teal-600 flex items-center justify-center mb-3">
                     <Sparkles className="w-6 h-6" />
                   </div>
                   <h4 className="font-bold mb-1">ناوەکانی خودا</h4>
                   <p className="text-xs text-muted-foreground">٩٩ ناوی پیرۆز</p>
                   <Link to="/names" className="absolute inset-0" aria-label="Names of Allah" />
+                </motion.div>
+
+                <motion.div whileHover={{ y: -5 }} className="relative p-6 rounded-3xl glass-card border-none bg-card/50 flex flex-col items-center text-center">
+                  <div className="w-12 h-12 rounded-full bg-emerald-100 dark:bg-emerald-900/20 text-emerald-600 flex items-center justify-center mb-3">
+                    <BookOpen className="w-6 h-6" />
+                  </div>
+                  <h4 className="font-bold mb-1">سیرەی پێغەمبەر</h4>
+                  <p className="text-xs text-muted-foreground">ژیاننامەی محمد ﷺ</p>
+                  <Link to="/seerah" className="absolute inset-0" aria-label="Seerah" />
                 </motion.div>
               </div>
             </motion.div>

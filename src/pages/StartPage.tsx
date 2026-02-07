@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import {
     Book, ScrollText, FileText, ListChecks, GraduationCap,
-    Sparkles, Star, Clock, Moon, Circle, Calculator, Scale, Users
+    Sparkles, Star, Clock, Moon, Circle, Calculator, Scale, Users, BookOpen, Library
 } from "lucide-react";
 import { Navigation } from "@/components/Navigation";
 import { GeometricPattern } from "@/components/GeometricPattern";
@@ -25,12 +25,28 @@ const allFeatures = [
         color: "bg-emerald-500/10 text-emerald-600",
     },
     {
+        icon: BookOpen,
+        title: "سیرەی پێغەمبەر",
+        subtitle: "ژیاننامەی محمد ﷺ",
+        description: "ژیاننامەی تەواوی پێغەمبەری ئیسلام لە لەدایکبوون تا کۆچی دوایی",
+        link: "/seerah",
+        color: "bg-emerald-500/10 text-emerald-600",
+    },
+    {
         icon: Users,
         title: "هاوەڵانی پێغەمبەر",
         subtitle: "ژیاننامەی هاوەڵان",
         description: "ژیاننامە و بەسەرهاتی هاوەڵە بەڕێزەکان",
         link: "/companions",
         color: "bg-cyan-500/10 text-cyan-600",
+    },
+    {
+        icon: Library,
+        title: "کتێبخانەی ئیسلامی",
+        subtitle: "کتێب و وتار و ڤیدیۆ",
+        description: "کتێب، وتار، دەنگ و ڤیدیۆی ئیسلامی بە کوردی",
+        link: "/library",
+        color: "bg-purple-500/10 text-purple-600",
     },
     {
         icon: Clock,
