@@ -4,6 +4,10 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Compass, X, MapPin, Navigation2 } from "lucide-react";
 import { Button } from "./ui/button";
 
+// Kaaba coordinates (Mecca)
+const KAABA_LAT = 21.4225;
+const KAABA_LNG = 39.8262;
+
 export function QiblaIndicator() {
     const [qiblaAngle, setQiblaAngle] = useState<number | null>(null);
     const [deviceHeading, setDeviceHeading] = useState<number>(0);
@@ -12,24 +16,34 @@ export function QiblaIndicator() {
     const [hasOrientationPermission, setHasOrientationPermission] = useState<boolean | null>(null);
     const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
 
+    /**
+     * Calculate Qibla direction using the Spherical Law of Cosines
+     * Returns bearing in degrees from North (0-360)
+     */
     const calculateQibla = useCallback((latitude: number, longitude: number) => {
-        // Mecca coordinates
-        const meccaLat = 21.4225;
-        const meccaLon = 39.8262;
+        // Convert degrees to radians
+        const toRad = (deg: number) => deg * (Math.PI / 180);
+        const toDeg = (rad: number) => rad * (180 / Math.PI);
 
-        // Convert to radians
-        const φ1 = latitude * (Math.PI / 180);
-        const φ2 = meccaLat * (Math.PI / 180);
-        const Δλ = (meccaLon - longitude) * (Math.PI / 180);
+        const userLatRad = toRad(latitude);
+        const userLngRad = toRad(longitude);
+        const kaabaLatRad = toRad(KAABA_LAT);
+        const kaabaLngRad = toRad(KAABA_LNG);
 
-        // Bearing formula
-        const y = Math.sin(Δλ) * Math.cos(φ2);
-        const x = Math.cos(φ1) * Math.sin(φ2) - Math.sin(φ1) * Math.cos(φ2) * Math.cos(Δλ);
+        // Calculate the difference in longitude
+        const deltaLng = kaabaLngRad - userLngRad;
 
-        let θ = Math.atan2(y, x);
-        let bearing = (θ * 180 / Math.PI + 360) % 360;
+        // Qibla bearing formula (Great Circle bearing)
+        const y = Math.sin(deltaLng);
+        const x = Math.cos(userLatRad) * Math.tan(kaabaLatRad) - Math.sin(userLatRad) * Math.cos(deltaLng);
 
-        console.log(`Qibla bearing for (${latitude}, ${longitude}): ${bearing}°`);
+        // Calculate bearing
+        let bearing = toDeg(Math.atan2(y, x));
+
+        // Normalize to 0-360 range
+        bearing = (bearing + 360) % 360;
+
+        console.log(`Qibla bearing for (${latitude.toFixed(4)}, ${longitude.toFixed(4)}): ${bearing.toFixed(2)}°`);
         setQiblaAngle(bearing);
         return bearing;
     }, []);
@@ -37,13 +51,15 @@ export function QiblaIndicator() {
     const handleOrientation = useCallback((event: DeviceOrientationEvent) => {
         let heading = 0;
 
+        // iOS Safari uses webkitCompassHeading (0 = North, increases clockwise)
         if ('webkitCompassHeading' in event && typeof (event as any).webkitCompassHeading === 'number') {
-            // iOS - webkitCompassHeading gives compass heading directly
             heading = (event as any).webkitCompassHeading;
-        } else if (event.alpha !== null) {
-            // Android - alpha is the compass direction the device is facing
-            // alpha = 0 means device points to North, alpha = 90 means East, etc.
-            // We need to convert: when alpha = 0 (North), heading should be 0
+        }
+        // Android Chrome uses alpha (0 = arbitrary direction at start, or North with absolute: true)
+        else if (event.alpha !== null) {
+            // If absolute is true, alpha represents the compass heading from magnetic north
+            // alpha = 0 means device points North, increases counter-clockwise
+            // We need clockwise heading, so: heading = (360 - alpha) % 360
             heading = (360 - event.alpha) % 360;
         }
 
@@ -73,9 +89,17 @@ export function QiblaIndicator() {
                 setHasOrientationPermission(false);
             }
         } else {
-            // Android and older iOS - no permission needed
+            // Android - try to use absolute orientation first for accurate compass
+            // deviceorientationabsolute gives true north heading
             setHasOrientationPermission(true);
-            window.addEventListener('deviceorientation', handleOrientation, true);
+
+            // Try absolute orientation first (better for compass)
+            const win = window as Window & { ondeviceorientationabsolute?: any };
+            if (win.ondeviceorientationabsolute !== undefined) {
+                win.addEventListener('deviceorientationabsolute' as any, handleOrientation);
+            } else {
+                win.addEventListener('deviceorientation', handleOrientation);
+            }
         }
     }, [handleOrientation]);
 
@@ -131,7 +155,8 @@ export function QiblaIndicator() {
 
     useEffect(() => {
         return () => {
-            window.removeEventListener('deviceorientation', handleOrientation, true);
+            window.removeEventListener('deviceorientation', handleOrientation);
+            (window as any).removeEventListener('deviceorientationabsolute', handleOrientation);
         };
     }, [handleOrientation]);
 

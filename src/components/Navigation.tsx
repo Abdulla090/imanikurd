@@ -108,21 +108,23 @@ export function Navigation() {
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: 8, scale: 0.96 }}
                         transition={{ duration: 0.15 }}
-                        className="absolute top-full left-0 mt-2 w-48 py-2 glass-card rounded-xl shadow-xl border border-border/50"
+                        className="absolute top-full left-0 mt-2 p-3 glass-card rounded-2xl shadow-xl border border-border/50"
                       >
-                        {moreNavItems.map((item) => (
-                          <Link
-                            key={item.path}
-                            to={item.path}
-                            className={`flex items-center gap-3 px-4 py-2.5 text-sm transition-colors ${location.pathname === item.path
+                        <div className="grid grid-cols-2 gap-2 w-72">
+                          {moreNavItems.map((item) => (
+                            <Link
+                              key={item.path}
+                              to={item.path}
+                              className={`flex items-center gap-2 px-3 py-2.5 text-sm rounded-xl transition-colors ${location.pathname === item.path
                                 ? "bg-primary/10 text-primary"
                                 : "text-foreground hover:bg-muted"
-                              }`}
-                          >
-                            <item.icon className="w-4 h-4" />
-                            {item.name}
-                          </Link>
-                        ))}
+                                }`}
+                            >
+                              <item.icon className="w-4 h-4" />
+                              <span className="whitespace-nowrap">{item.name}</span>
+                            </Link>
+                          ))}
+                        </div>
                       </motion.div>
                     )}
                   </AnimatePresence>
