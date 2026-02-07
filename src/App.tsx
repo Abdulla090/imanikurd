@@ -24,7 +24,6 @@ const NamesOfAllahPage = lazy(() => import("./pages/NamesOfAllahPage"));
 const CompanionsPage = lazy(() => import("./pages/CompanionsPage"));
 const SeerahPage = lazy(() => import("./pages/SeerahPage"));
 const LibraryPage = lazy(() => import("./pages/LibraryPage"));
-const ChatbotPage = lazy(() => import("./pages/ChatbotPage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 import { ChatBubble } from "./components/ChatBubble";
@@ -138,7 +137,6 @@ const App = () => {
                 <Route path="/seerah" element={<PageTransition><SeerahPage /></PageTransition>} />
                 <Route path="/companions" element={<PageTransition><CompanionsPage /></PageTransition>} />
                 <Route path="/library" element={<PageTransition><LibraryPage /></PageTransition>} />
-                <Route path="/chat" element={<PageTransition><ChatbotPage /></PageTransition>} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </AnimatePresence>

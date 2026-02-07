@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Book, Home, Menu, X, ScrollText, ListChecks, Moon, Sun, Clock, Sparkles, Circle, Calculator, Scale, ChevronDown, BookOpen, Users, Library, Bot } from "lucide-react";
+import { Book, Home, Menu, X, ScrollText, ListChecks, Moon, Sun, Clock, Sparkles, Circle, Calculator, Scale, ChevronDown, BookOpen, Users, Library } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { QiblaIndicator } from "./QiblaIndicator";
 
@@ -15,7 +15,6 @@ const mainNavItems = [
 
 // Items shown in "More" dropdown on desktop
 const moreNavItems = [
-  { name: "یاریدەدەری AI", path: "/chat", icon: Bot },
   { name: "ئەزکار", path: "/azkar", icon: Sparkles },
   { name: "تەسبیح", path: "/tasbih", icon: Circle },
   { name: "شوێنکەوتن", path: "/tracker", icon: ListChecks },

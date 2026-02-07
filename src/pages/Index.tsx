@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { Book, ScrollText, FileText, ListChecks, GraduationCap, Sparkles, Star, RefreshCw, Clock, MessageCircle, Moon, Circle, BookOpen, Users, Bot } from "lucide-react";
+import { Book, ScrollText, FileText, ListChecks, GraduationCap, Sparkles, Star, RefreshCw, Clock, MessageCircle, Moon, Circle, BookOpen, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Navigation } from "@/components/Navigation";
 import { GeometricPattern } from "@/components/GeometricPattern";
@@ -316,29 +316,6 @@ export default function Index() {
                   <div>
                     <p className="text-xs text-white/80 font-medium">سیرەی پێغەمبەر</p>
                     <p className="text-[10px] text-white/50">ژیاننامە</p>
-                  </div>
-                </div>
-
-                <div className="absolute inset-0 bg-white/5 opacity-0 group-active:opacity-100 transition-opacity" />
-              </Link>
-
-              {/* AI Assistant Card */}
-              <Link
-                to="/chat"
-                className="relative overflow-hidden rounded-3xl h-36 group"
-              >
-                <div className="absolute inset-0 bg-gradient-to-br from-violet-900/90 to-purple-800/80" />
-                <div className="absolute top-0 left-0 w-20 h-20 bg-violet-400/20 rounded-full blur-xl -translate-y-1/2" />
-                <div className="absolute bottom-0 right-0 w-16 h-16 bg-purple-400/20 rounded-full blur-xl translate-y-1/2" />
-
-                <div className="relative z-10 h-full p-4 flex flex-col justify-between">
-                  <div className="w-9 h-9 rounded-xl bg-white/10 backdrop-blur-sm flex items-center justify-center">
-                    <Bot className="w-4 h-4 text-white" />
-                  </div>
-
-                  <div>
-                    <p className="text-xs text-white/80 font-medium">یاریدەدەری AI</p>
-                    <p className="text-[10px] text-white/50">پرسیار بکە</p>
                   </div>
                 </div>
 
