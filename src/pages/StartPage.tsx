@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import {
     Book, ScrollText, FileText, ListChecks, GraduationCap,
-    Sparkles, Star, Clock, Moon, Circle, Calculator, Scale, Users, BookOpen, Library
+    Sparkles, Star, Clock, Moon, Circle, Calculator, Scale, Users, BookOpen, Library, Bot
 } from "lucide-react";
 import { Navigation } from "@/components/Navigation";
 import { GeometricPattern } from "@/components/GeometricPattern";
@@ -23,6 +23,14 @@ const allFeatures = [
         description: "کۆکراوەی حەدیسی صەحیح بە لێکدانەوەی کوردی",
         link: "/hadith",
         color: "bg-emerald-500/10 text-emerald-600",
+    },
+    {
+        icon: Bot,
+        title: "یاریدەدەری AI",
+        subtitle: "پرسیار لە ئیسلام",
+        description: "پرسیارەکانت لەسەر ئیسلام بکە و وەڵامی زیرەک وەربگرە",
+        link: "/chat",
+        color: "bg-violet-500/10 text-violet-600",
     },
     {
         icon: BookOpen,
