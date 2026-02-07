@@ -1,15 +1,29 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Book, FileText, Headphones, Video, Search, ChevronLeft, ExternalLink, Loader2, AlertCircle, RefreshCw } from "lucide-react";
+import { Book, FileText, Headphones, Video, Search, ChevronLeft, Loader2, AlertCircle, RefreshCw } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Navigation } from "@/components/Navigation";
 import { GeometricPattern } from "@/components/GeometricPattern";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { islamhouseApi, type IslamHouseItem, type ContentType } from "@/lib/islamhouse-api";
 
-// Static fallback data in case API fails
-const FALLBACK_MESSAGE = "ببوورە، ئێستا ناتوانین پەیوەندی بە سێرڤەرەوە بکەین. تکایە دواتر هەوڵبدەوە.";
+// Types
+interface LibraryItem {
+    id: number;
+    title: string;
+    author: string;
+    description: string;
+    category?: string;
+}
+
+interface LibraryData {
+    books: LibraryItem[];
+    articles: LibraryItem[];
+    audio: LibraryItem[];
+    videos: LibraryItem[];
+}
+
+type ContentType = "books" | "articles" | "audio" | "videos";
 
 interface ContentTab {
     id: ContentType;
@@ -19,99 +33,66 @@ interface ContentTab {
 }
 
 const contentTabs: ContentTab[] = [
-    { id: "book", label: "Books", icon: Book, kurdishLabel: "کتێبەکان" },
+    { id: "books", label: "Books", icon: Book, kurdishLabel: "کتێبەکان" },
     { id: "articles", label: "Articles", icon: FileText, kurdishLabel: "وتارەکان" },
     { id: "audio", label: "Audio", icon: Headphones, kurdishLabel: "دەنگییەکان" },
-    { id: "video", label: "Video", icon: Video, kurdishLabel: "ڤیدیۆکان" },
+    { id: "videos", label: "Video", icon: Video, kurdishLabel: "ڤیدیۆکان" },
 ];
 
 export default function LibraryPage() {
-    const [activeTab, setActiveTab] = useState<ContentType>("book");
-    const [items, setItems] = useState<IslamHouseItem[]>([]);
+    const [activeTab, setActiveTab] = useState<ContentType>("books");
+    const [libraryData, setLibraryData] = useState<LibraryData | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [searchQuery, setSearchQuery] = useState("");
-    const [selectedItem, setSelectedItem] = useState<IslamHouseItem | null>(null);
-    const [page, setPage] = useState(1);
-    const [hasMore, setHasMore] = useState(true);
+    const [selectedItem, setSelectedItem] = useState<LibraryItem | null>(null);
 
-    // Fetch content when tab changes
+    // Fetch library data on mount
     useEffect(() => {
-        fetchContent();
-    }, [activeTab]);
+        fetchLibraryData();
+    }, []);
 
-    const fetchContent = async (reset = true) => {
+    const fetchLibraryData = async () => {
         try {
             setLoading(true);
             setError(null);
 
-            const currentPage = reset ? 1 : page;
-            if (reset) setPage(1);
-
-            let data: IslamHouseItem[];
-
-            switch (activeTab) {
-                case "book":
-                    data = await islamhouseApi.getBooks(currentPage, 20);
-                    break;
-                case "articles":
-                    data = await islamhouseApi.getArticles(currentPage, 20);
-                    break;
-                case "audio":
-                    data = await islamhouseApi.getAudio(currentPage, 20);
-                    break;
-                case "video":
-                    data = await islamhouseApi.getVideos(currentPage, 20);
-                    break;
-                default:
-                    data = await islamhouseApi.getItems(activeTab, "ku", "showall", currentPage, 20);
+            const response = await fetch("/data/library.json");
+            if (!response.ok) {
+                throw new Error("Failed to load library data");
             }
 
-            if (reset) {
-                setItems(data || []);
-            } else {
-                setItems(prev => [...prev, ...(data || [])]);
-            }
-
-            setHasMore((data?.length || 0) >= 20);
+            const data: LibraryData = await response.json();
+            setLibraryData(data);
         } catch (err) {
-            console.error("Error fetching content:", err);
-            setError(FALLBACK_MESSAGE);
+            console.error("Error loading library:", err);
+            setError("ببوورە، ناتوانین داتاکان بخوێنینەوە");
         } finally {
             setLoading(false);
         }
     };
 
-    const handleSearch = async () => {
-        if (!searchQuery.trim()) {
-            fetchContent();
-            return;
-        }
-
-        try {
-            setLoading(true);
-            setError(null);
-
-            const data = await islamhouseApi.searchItems(searchQuery, "ku", activeTab);
-            setItems(data || []);
-            setHasMore(false);
-        } catch (err) {
-            console.error("Search error:", err);
-            setError(FALLBACK_MESSAGE);
-        } finally {
-            setLoading(false);
-        }
+    // Get items for current tab
+    const getCurrentItems = (): LibraryItem[] => {
+        if (!libraryData) return [];
+        return libraryData[activeTab] || [];
     };
 
-    const loadMore = () => {
-        setPage(prev => prev + 1);
-        fetchContent(false);
+    // Filter items by search query
+    const getFilteredItems = (): LibraryItem[] => {
+        const items = getCurrentItems();
+        if (!searchQuery.trim()) return items;
+
+        const query = searchQuery.toLowerCase();
+        return items.filter(item =>
+            item.title.toLowerCase().includes(query) ||
+            item.author.toLowerCase().includes(query) ||
+            item.description.toLowerCase().includes(query)
+        );
     };
 
-    const getTabIcon = (tabId: ContentType) => {
-        const tab = contentTabs.find(t => t.id === tabId);
-        return tab?.icon || Book;
-    };
+    const filteredItems = getFilteredItems();
+    const currentTab = contentTabs.find(t => t.id === activeTab)!;
 
     return (
         <div className="min-h-screen relative overflow-hidden">
@@ -126,7 +107,7 @@ export default function LibraryPage() {
                         animate={{ opacity: 1, y: 0 }}
                         className="text-center mb-8"
                     >
-                        <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 mb-4">
+                        <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-500 to-indigo-600 mb-4">
                             <Book className="w-8 h-8 text-white" />
                         </div>
                         <h1 className="font-naskh text-3xl md:text-4xl font-bold text-foreground mb-2">
@@ -134,9 +115,6 @@ export default function LibraryPage() {
                         </h1>
                         <p className="text-muted-foreground">
                             کتێب، وتار، دەنگ و ڤیدیۆی ئیسلامی بە کوردی
-                        </p>
-                        <p className="text-xs text-muted-foreground/60 mt-1">
-                            سەرچاوە: IslamHouse.com
                         </p>
                     </motion.div>
 
@@ -147,23 +125,14 @@ export default function LibraryPage() {
                         transition={{ delay: 0.1 }}
                         className="max-w-xl mx-auto mb-8"
                     >
-                        <div className="relative flex gap-2">
-                            <div className="relative flex-1">
-                                <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                                <Input
-                                    placeholder="گەڕان..."
-                                    value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
-                                    onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-                                    className="pr-10 h-12 rounded-xl bg-card/50 border-border/50"
-                                />
-                            </div>
-                            <Button
-                                onClick={handleSearch}
-                                className="h-12 px-6 rounded-xl bg-primary hover:bg-primary/90"
-                            >
-                                گەڕان
-                            </Button>
+                        <div className="relative">
+                            <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                            <Input
+                                placeholder="گەڕان..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="pr-10 h-12 rounded-xl bg-card/50 border-border/50"
+                            />
                         </div>
                     </motion.div>
 
@@ -185,7 +154,7 @@ export default function LibraryPage() {
                         {/* Content Area */}
                         {contentTabs.map((tab) => (
                             <TabsContent key={tab.id} value={tab.id} className="mt-0">
-                                {loading && items.length === 0 ? (
+                                {loading ? (
                                     <div className="flex flex-col items-center justify-center py-20">
                                         <Loader2 className="w-10 h-10 text-primary animate-spin mb-4" />
                                         <p className="text-muted-foreground">چاوەڕێ بکە...</p>
@@ -194,78 +163,72 @@ export default function LibraryPage() {
                                     <div className="flex flex-col items-center justify-center py-20 text-center">
                                         <AlertCircle className="w-12 h-12 text-destructive mb-4" />
                                         <p className="text-muted-foreground mb-4">{error}</p>
-                                        <Button onClick={() => fetchContent()} variant="outline" className="gap-2">
+                                        <Button onClick={fetchLibraryData} variant="outline" className="gap-2">
                                             <RefreshCw className="w-4 h-4" />
                                             هەوڵی دووبارە
                                         </Button>
                                     </div>
-                                ) : items.length === 0 ? (
+                                ) : filteredItems.length === 0 ? (
                                     <div className="flex flex-col items-center justify-center py-20">
                                         <tab.icon className="w-12 h-12 text-muted-foreground/50 mb-4" />
                                         <p className="text-muted-foreground">هیچ ناوەڕۆکێک نەدۆزرایەوە</p>
                                     </div>
                                 ) : (
-                                    <>
-                                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                                            <AnimatePresence mode="popLayout">
-                                                {items.map((item, index) => (
-                                                    <motion.div
-                                                        key={item.id}
-                                                        initial={{ opacity: 0, y: 20 }}
-                                                        animate={{ opacity: 1, y: 0 }}
-                                                        exit={{ opacity: 0, scale: 0.9 }}
-                                                        transition={{ delay: index * 0.05 }}
-                                                        onClick={() => setSelectedItem(item)}
-                                                        className="group p-4 rounded-2xl bg-card/50 border border-border/50 hover:border-primary/30 hover:bg-card/80 cursor-pointer transition-all"
-                                                    >
-                                                        <div className="flex items-start gap-3">
-                                                            <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-                                                                <tab.icon className="w-6 h-6 text-primary" />
-                                                            </div>
-                                                            <div className="flex-1 min-w-0">
-                                                                <h3 className="font-semibold text-foreground line-clamp-2 group-hover:text-primary transition-colors">
-                                                                    {item.title}
-                                                                </h3>
-                                                                {item.description && (
-                                                                    <p className="text-sm text-muted-foreground line-clamp-2 mt-1">
-                                                                        {item.description}
-                                                                    </p>
-                                                                )}
-                                                                {item.prepared_by && item.prepared_by.length > 0 && (
-                                                                    <p className="text-xs text-primary/70 mt-2">
-                                                                        {item.prepared_by[0].title}
-                                                                    </p>
-                                                                )}
-                                                            </div>
-                                                        </div>
-                                                    </motion.div>
-                                                ))}
-                                            </AnimatePresence>
-                                        </div>
-
-                                        {/* Load More */}
-                                        {hasMore && (
-                                            <div className="flex justify-center mt-8">
-                                                <Button
-                                                    onClick={loadMore}
-                                                    variant="outline"
-                                                    disabled={loading}
-                                                    className="gap-2"
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                                        <AnimatePresence mode="popLayout">
+                                            {filteredItems.map((item, index) => (
+                                                <motion.div
+                                                    key={item.id}
+                                                    initial={{ opacity: 0, y: 20 }}
+                                                    animate={{ opacity: 1, y: 0 }}
+                                                    exit={{ opacity: 0, scale: 0.9 }}
+                                                    transition={{ delay: index * 0.05 }}
+                                                    onClick={() => setSelectedItem(item)}
+                                                    className="group p-4 rounded-2xl bg-card/50 border border-border/50 hover:border-primary/30 hover:bg-card/80 cursor-pointer transition-all"
                                                 >
-                                                    {loading ? (
-                                                        <Loader2 className="w-4 h-4 animate-spin" />
-                                                    ) : (
-                                                        <ChevronLeft className="w-4 h-4 rotate-90" />
-                                                    )}
-                                                    زیاتر ببینە
-                                                </Button>
-                                            </div>
-                                        )}
-                                    </>
+                                                    <div className="flex items-start gap-3">
+                                                        <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                                                            <currentTab.icon className="w-6 h-6 text-primary" />
+                                                        </div>
+                                                        <div className="flex-1 min-w-0">
+                                                            <h3 className="font-semibold text-foreground line-clamp-2 group-hover:text-primary transition-colors">
+                                                                {item.title}
+                                                            </h3>
+                                                            <p className="text-xs text-primary/70 mt-1">
+                                                                {item.author}
+                                                            </p>
+                                                            {item.description && (
+                                                                <p className="text-sm text-muted-foreground line-clamp-2 mt-1">
+                                                                    {item.description}
+                                                                </p>
+                                                            )}
+                                                            {item.category && (
+                                                                <span className="inline-block mt-2 px-2 py-0.5 text-[10px] bg-primary/10 text-primary rounded-full">
+                                                                    {item.category}
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                </motion.div>
+                                            ))}
+                                        </AnimatePresence>
+                                    </div>
                                 )}
                             </TabsContent>
                         ))}
                     </Tabs>
+
+                    {/* Coming Soon Notice */}
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 0.3 }}
+                        className="mt-8 text-center"
+                    >
+                        <p className="text-sm text-muted-foreground">
+                            🚧 ناوەڕۆکی زیاتر بەردەوام زیاد دەکرێت...
+                        </p>
+                    </motion.div>
                 </div>
             </main>
 
@@ -288,57 +251,33 @@ export default function LibraryPage() {
                         >
                             <div className="flex items-center gap-3 mb-4">
                                 <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-                                    {(() => {
-                                        const Icon = getTabIcon(activeTab);
-                                        return <Icon className="w-6 h-6 text-primary" />;
-                                    })()}
+                                    <currentTab.icon className="w-6 h-6 text-primary" />
                                 </div>
                                 <div>
                                     <h2 className="font-bold text-xl text-foreground">{selectedItem.title}</h2>
-                                    {selectedItem.prepared_by && selectedItem.prepared_by.length > 0 && (
-                                        <p className="text-sm text-primary">{selectedItem.prepared_by[0].title}</p>
-                                    )}
+                                    <p className="text-sm text-primary">{selectedItem.author}</p>
                                 </div>
                             </div>
 
-                            {selectedItem.description && (
-                                <p className="text-muted-foreground mb-4">{selectedItem.description}</p>
-                            )}
+                            <p className="text-muted-foreground mb-4">{selectedItem.description}</p>
 
-                            {selectedItem.full_description && (
-                                <div
-                                    className="prose prose-sm dark:prose-invert max-w-none mb-4"
-                                    dangerouslySetInnerHTML={{ __html: selectedItem.full_description }}
-                                />
-                            )}
-
-                            {/* Attachments */}
-                            {selectedItem.attachments && selectedItem.attachments.length > 0 && (
-                                <div className="space-y-2 mb-4">
-                                    <h3 className="font-semibold text-sm text-foreground">داگرتن:</h3>
-                                    {selectedItem.attachments.map((attachment, idx) => (
-                                        <a
-                                            key={idx}
-                                            href={attachment.url}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="flex items-center gap-2 p-3 rounded-xl bg-primary/10 hover:bg-primary/20 transition-colors"
-                                        >
-                                            <ExternalLink className="w-4 h-4 text-primary" />
-                                            <span className="text-sm text-foreground flex-1">
-                                                {attachment.description || `فایل ${idx + 1}`}
-                                            </span>
-                                            <span className="text-xs text-muted-foreground">
-                                                {attachment.extension_type?.toUpperCase()}
-                                            </span>
-                                        </a>
-                                    ))}
+                            {selectedItem.category && (
+                                <div className="mb-4">
+                                    <span className="px-3 py-1 text-sm bg-primary/10 text-primary rounded-full">
+                                        {selectedItem.category}
+                                    </span>
                                 </div>
                             )}
 
+                            <div className="bg-muted/50 rounded-xl p-4 mb-4">
+                                <p className="text-sm text-muted-foreground text-center">
+                                    🔜 داگرتن و خوێندنەوەی ئۆنلاین بەم زووانە زیاد دەکرێت
+                                </p>
+                            </div>
+
                             <Button
                                 onClick={() => setSelectedItem(null)}
-                                className="w-full mt-4"
+                                className="w-full"
                             >
                                 داخستن
                             </Button>
