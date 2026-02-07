@@ -130,135 +130,142 @@ export default function ChatbotPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="fixed inset-0 bg-background flex flex-col">
       <Navigation />
 
-      <main className="pt-20 sm:pt-24 pb-6 sm:pb-8 px-2 sm:px-4 h-screen flex flex-col">
-        <div className="w-full max-w-4xl mx-auto flex-1 flex flex-col">
-          {/* Header */}
-          <div className="text-center mb-6">
-            <div className="inline-flex items-center gap-3 mb-4">
-              <div className="w-16 h-16 rounded-2xl bg-primary flex items-center justify-center text-primary-foreground font-arabic text-3xl shadow-lg">
-                ☪
-              </div>
+      <main className="flex-1 flex flex-col pt-16 sm:pt-20 pb-4 px-2 sm:px-4 max-w-5xl mx-auto w-full h-full overflow-hidden">
+        {/* Header - Compact */}
+        <div className="shrink-0 text-center py-2 sm:py-4 flex flex-col items-center justify-center relative z-10 transition-all duration-300">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center text-primary-foreground font-arabic text-xl shadow-lg">
+              ☪
             </div>
-            <h1 className="text-3xl font-bold font-naskh text-foreground mb-2">
+            <h1 className="text-xl sm:text-2xl font-bold font-naskh text-foreground">
               یاریدەدەری ئیسلامی
             </h1>
-            <p className="text-muted-foreground">
-              پرسیارەکانت دەربارەی ئیسلام، قورئان، حەدیس و کردارە ئیسلامییەکان بپرسە
-            </p>
-
-            {/* Language Toggle */}
-            <div className="mt-4 inline-flex items-center gap-2 bg-muted rounded-xl p-1">
-              <button
-                onClick={() => setLanguage("ku")}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 ${language === "ku"
-                  ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:text-foreground"
-                  }`}
-              >
-                <span className="text-yellow-500">☀️</span> کوردی
-              </button>
-              <button
-                onClick={() => setLanguage("en")}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${language === "en"
-                  ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:text-foreground"
-                  }`}
-              >
-                English 🇬🇧
-              </button>
-            </div>
           </div>
 
-          {/* Chat Area */}
-          <div className="flex-1 glass-card rounded-2xl flex flex-col overflow-hidden">
-            {/* Messages */}
-            <div className="flex-1 overflow-y-auto p-6 space-y-4">
-              {messages.length === 0 && (
-                <div className="text-center py-12">
-                  <Sparkles className="w-12 h-12 text-primary mx-auto mb-4" />
-                  <p className="font-naskh text-2xl mb-4 text-foreground">
-                    سڵاو لەسەرتان و ڕەحمەتی خوا 👋
-                  </p>
-                  <p className="text-muted-foreground mb-8">
-                    من یاریدەدەرێکی ئیسلامیم، پرسیارەکانت بپرسە
-                  </p>
+          {/* Language Toggle - Absolute on desktop, relative on mobile */}
+          <div className="sm:absolute sm:right-0 sm:top-1/2 sm:-translate-y-1/2 mt-2 sm:mt-0 flex bg-muted/50 rounded-lg p-1">
+            <button
+              onClick={() => setLanguage("ku")}
+              className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${language === "ku"
+                ? "bg-primary text-primary-foreground shadow-sm"
+                : "text-muted-foreground hover:text-foreground"
+                }`}
+            >
+              کوردی
+            </button>
+            <button
+              onClick={() => setLanguage("en")}
+              className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${language === "en"
+                ? "bg-primary text-primary-foreground shadow-sm"
+                : "text-muted-foreground hover:text-foreground"
+                }`}
+            >
+              English
+            </button>
+          </div>
+        </div>
 
-                  {/* Suggested Questions */}
-                  <div className="flex flex-wrap justify-center gap-3">
-                    {suggestedQuestions.map((question, index) => (
-                      <button
-                        key={index}
-                        onClick={() => setInput(question)}
-                        className="px-4 py-2 bg-muted hover:bg-primary/20 rounded-xl text-sm transition-colors"
-                      >
-                        {question}
-                      </button>
-                    ))}
-                  </div>
+        {/* Chat Area - Flex Grow to take remaining space */}
+        <div className="flex-1 min-h-0 glass-card rounded-2xl border border-border/50 shadow-xl flex flex-col overflow-hidden relative">
+
+          {/* Messages Area */}
+          <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 scroll-smooth">
+            {messages.length === 0 && (
+              <div className="h-full flex flex-col items-center justify-center text-center p-4">
+                <Sparkles className="w-12 h-12 text-primary/50 mb-4 animate-pulse" />
+                <h2 className="font-naskh text-2xl mb-2 text-foreground">
+                  سڵاو لەسەرتان و ڕەحمەتی خوا 👋
+                </h2>
+                <p className="text-muted-foreground mb-8 max-w-md">
+                  من یاریدەدەرێکی ئیسلامیم. دەتوانیت هەر پرسیارێک دەربارەی ئیسلام، قورئان و حەدیس هەبێت لێم بپرسیت.
+                </p>
+
+                {/* Suggested Questions */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full max-w-lg">
+                  {suggestedQuestions.map((question, index) => (
+                    <button
+                      key={index}
+                      onClick={() => {
+                        setInput(question);
+                        // Optional: auto-send
+                      }}
+                      className="px-4 py-3 bg-card hover:bg-primary/5 border border-border/50 hover:border-primary/30 rounded-xl text-sm transition-all text-right flex items-center justify-between group"
+                    >
+                      <span>{question}</span>
+                      <Send className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity text-primary" />
+                    </button>
+                  ))}
                 </div>
-              )}
+              </div>
+            )}
 
-              {messages.map((msg, index) => (
+            {messages.map((msg, index) => (
+              <div
+                key={index}
+                className={`flex ${msg.role === "user" ? "justify-start" : "justify-end"} animate-fade-in`}
+              >
                 <div
-                  key={index}
-                  className={`flex ${msg.role === "user" ? "justify-start" : "justify-end"} animate-fade-in`}
-                  style={{ animationDuration: "0.15s" }}
+                  className={`max-w-[85%] sm:max-w-[80%] p-3 sm:p-4 rounded-2xl shadow-sm ${msg.role === "user"
+                    ? "bg-primary text-primary-foreground rounded-tr-none"
+                    : "bg-card border border-border/50 rounded-tl-none"
+                    }`}
                 >
-                  <div
-                    className={`max-w-[85%] sm:max-w-[80%] p-3 sm:p-4 rounded-2xl overflow-hidden ${msg.role === "user"
-                      ? "bg-primary text-primary-foreground rounded-tr-none"
-                      : "bg-muted rounded-tl-none"
-                      }`}
-                  >
-                    {msg.role === "assistant" ? (
-                      <div
-                        className="text-sm leading-relaxed prose prose-sm max-w-none break-words [&_ul]:pr-4 [&_li]:break-words [&_p]:break-words"
-                        style={{ wordBreak: "break-word", overflowWrap: "anywhere" }}
-                        dangerouslySetInnerHTML={{ __html: formatMessage(msg.content) }}
-                      />
-                    ) : (
-                      <p className="text-sm break-words">{msg.content}</p>
-                    )}
-                  </div>
+                  {msg.role === "assistant" ? (
+                    <div
+                      className="text-sm leading-relaxed prose prose-sm max-w-none break-words dark:prose-invert [&_strong]:text-primary"
+                      dangerouslySetInnerHTML={{ __html: formatMessage(msg.content) }}
+                    />
+                  ) : (
+                    <p className="text-sm">{msg.content}</p>
+                  )}
                 </div>
-              ))}
+              </div>
+            ))}
 
-              {isLoading && (
-                <div className="flex justify-end animate-fade-in" style={{ animationDuration: "0.15s" }}>
-                  <div className="bg-muted p-4 rounded-2xl rounded-tl-none flex items-center gap-2">
-                    <Loader2 className="w-5 h-5 animate-spin text-primary" />
-                    <span className="text-sm text-muted-foreground">چاوەڕوان بە...</span>
+            {isLoading && (
+              <div className="flex justify-end animate-fade-in">
+                <div className="bg-card border border-border/50 p-3 rounded-2xl rounded-tl-none flex items-center gap-2 shadow-sm">
+                  <div className="flex gap-1">
+                    <span className="w-1.5 h-1.5 bg-primary rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
+                    <span className="w-1.5 h-1.5 bg-primary rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
+                    <span className="w-1.5 h-1.5 bg-primary rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
                   </div>
+                  <span className="text-xs text-muted-foreground">نووسین...</span>
                 </div>
-              )}
-              <div ref={messagesEndRef} />
-            </div>
+              </div>
+            )}
+            <div ref={messagesEndRef} />
+          </div>
 
-            {/* Input */}
-            <div className="p-4 border-t border-border bg-background/50">
-              <div className="flex gap-3">
-                <input
-                  type="text"
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  onKeyPress={handleKeyPress}
-                  placeholder="پرسیارت بنووسە..."
-                  className="flex-1 px-6 py-4 rounded-xl bg-muted border-none focus:ring-2 focus:ring-primary outline-none text-base"
-                  dir="rtl"
-                />
+          {/* Input Area */}
+          <div className="p-3 sm:p-4 border-t border-border/50 bg-background/80 backdrop-blur-lg">
+            <div className="flex gap-2 relative max-w-4xl mx-auto">
+              <input
+                type="text"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyPress={handleKeyPress}
+                placeholder="پرسیارەکەت بنووسە..."
+                className="flex-1 px-4 py-3 sm:py-4 pr-12 rounded-xl bg-muted/50 border border-transparent focus:bg-background focus:border-primary/20 focus:ring-2 focus:ring-primary/10 transition-all outline-none text-base"
+                dir="auto"
+              />
+              <div className="absolute left-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
                 <Button
                   onClick={sendMessage}
                   disabled={isLoading || !input.trim()}
-                  size="lg"
-                  className="px-8 rounded-xl"
+                  size="icon"
+                  className="h-9 w-9 rounded-lg shrink-0"
                 >
-                  <Send className="w-5 h-5" />
+                  {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4 rtl:-scale-x-100" />}
                 </Button>
               </div>
             </div>
+            <p className="text-[10px] text-center text-muted-foreground mt-2 opacity-70">
+              ئەمە ژیری دەستکردە، بۆ فەتوا پرس بە مامۆستای ئایینی بکە.
+            </p>
           </div>
         </div>
       </main>
