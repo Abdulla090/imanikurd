@@ -8,6 +8,7 @@ import { QiblaIndicator } from "./QiblaIndicator";
 // Main nav items shown directly in desktop navbar
 const mainNavItems = [
   { name: "سەرەکی", path: "/", icon: Home },
+  { name: "ڕەمەزان", path: "/ramadan", icon: Moon },
   { name: "قورئان", path: "/quran", icon: Book },
   { name: "حەدیس", path: "/hadith", icon: ScrollText },
   { name: "کاتی نوێژ", path: "/prayer-times", icon: Clock },

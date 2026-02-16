@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { Book, ScrollText, FileText, ListChecks, GraduationCap, Sparkles, Star, RefreshCw, Clock, MessageCircle, Moon, Circle, BookOpen, Users, Bot } from "lucide-react";
+import { Book, ScrollText, FileText, ListChecks, GraduationCap, Sparkles, Star, RefreshCw, Clock, MessageCircle, Moon, Circle, BookOpen, Users, Bot, Library } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Navigation } from "@/components/Navigation";
 import { GeometricPattern } from "@/components/GeometricPattern";
@@ -366,6 +366,28 @@ export default function Index() {
 
                 <div className="absolute inset-0 bg-white/5 opacity-0 group-active:opacity-100 transition-opacity" />
               </Link>
+
+              {/* Islamic Library Card */}
+              <Link
+                to="/library"
+                className="col-span-2 relative overflow-hidden rounded-3xl h-32 group"
+              >
+                <div className="absolute inset-0 bg-gradient-to-br from-fuchsia-900/90 via-purple-800/80 to-pink-700/70" />
+                <div className="absolute top-0 right-0 w-32 h-32 bg-fuchsia-400/20 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2" />
+                <div className="absolute bottom-0 left-0 w-24 h-24 bg-pink-400/20 rounded-full blur-2xl translate-y-1/2 -translate-x-1/2" />
+
+                <div className="relative z-10 h-full p-5 flex items-center justify-between">
+                  <div>
+                    <p className="text-lg text-white/90 font-bold mb-1">کتێبخانەی ئیسلامی</p>
+                    <p className="text-xs text-white/60">کتێب، وتار، دەنگ و ڤیدیۆ - دابەزاندن</p>
+                  </div>
+                  <div className="w-14 h-14 rounded-2xl bg-white/10 backdrop-blur-sm flex items-center justify-center">
+                    <Library className="w-7 h-7 text-white" />
+                  </div>
+                </div>
+
+                <div className="absolute inset-0 bg-white/5 opacity-0 group-active:opacity-100 transition-opacity" />
+              </Link>
             </div>
 
             {/* Bottom Inspirational Touch */}
@@ -497,8 +519,8 @@ export default function Index() {
 
               </div>
 
-              {/* Second Row of Grid - 5 Columns */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4 mt-4">
+              {/* Second Row of Grid - 6 Columns */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-6 gap-4 mt-4">
                 <motion.div whileHover={{ y: -5 }} className="relative p-6 rounded-3xl glass-card border-none bg-card/50 flex flex-col items-center text-center">
                   <div className="w-12 h-12 rounded-full bg-green-100 dark:bg-green-900/20 text-green-600 flex items-center justify-center mb-3">
                     <ListChecks className="w-6 h-6" />
@@ -542,6 +564,15 @@ export default function Index() {
                   <h4 className="font-bold mb-1">سیرەی پێغەمبەر</h4>
                   <p className="text-xs text-muted-foreground">ژیاننامەی محمد ﷺ</p>
                   <Link to="/seerah" className="absolute inset-0" aria-label="Seerah" />
+                </motion.div>
+
+                <motion.div whileHover={{ y: -5 }} className="relative p-6 rounded-3xl glass-card border-none bg-gradient-to-br from-fuchsia-500/10 to-purple-500/10 flex flex-col items-center text-center">
+                  <div className="w-12 h-12 rounded-full bg-fuchsia-100 dark:bg-fuchsia-900/20 text-fuchsia-600 flex items-center justify-center mb-3">
+                    <Library className="w-6 h-6" />
+                  </div>
+                  <h4 className="font-bold mb-1">کتێبخانە</h4>
+                  <p className="text-xs text-muted-foreground">کتێبی ئیسلامی کوردی</p>
+                  <Link to="/library" className="absolute inset-0" aria-label="Library" />
                 </motion.div>
               </div>
             </motion.div>

@@ -1,0 +1,232 @@
+{
+    "books": [
+        {
+            "id": 1,
+            "title": "سەد فەرموودە لە زنجیرەی فەرموودە ڕاستەکان",
+            "titleEn": "100 Hadiths from Authentic Chain",
+            "category": "hadith",
+            "categoryKu": "فەرموودە",
+            "description": "کۆمەڵێک لە فەرموودە ڕاستەکان کە لەلایەن زانایانی ئیسلامەوە ڕاگەیەندراون",
+            "descriptionEn": "A collection of 100 authentic hadiths from reliable Islamic scholars",
+            "source": "archive.org",
+            "downloadUrl": "https://archive.org/details/100FrmwdaLeZnjyraiFrmwda",
+            "pdfUrl": "https://archive.org/download/100FrmwdaLeZnjyraiFrmwda/100%20frmwda%20le%20znjyrai%20frmwda.pdf",
+            "pages": 120,
+            "author": "نەزانراو",
+            "language": "Kurdish (Sorani)",
+            "coverImage": "https://archive.org/services/img/100FrmwdaLeZnjyraiFrmwda"
+        },
+        {
+            "id": 2,
+            "title": "فەرموودە هاوبەشەکانی بوخاری و موسلیم",
+            "titleEn": "Common Hadiths of Bukhari and Muslim",
+            "category": "hadith",
+            "categoryKu": "فەرموودە",
+            "description": "فەرموودەکانی کە لە هەردوو کۆکراوەی بوخاری و موسلیم تۆمارکراون",
+            "descriptionEn": "Hadiths that are recorded in both Sahih Bukhari and Sahih Muslim collections",
+            "source": "archive.org",
+            "downloadUrl": "https://archive.org/details/FrmwdaHawbashakanyBuxariOMslim",
+            "pdfUrl": "https://archive.org/download/FrmwdaHawbashakanyBuxariOMslim/Frmwda%20hawbashakany%20buxari%20o%20mslim.pdf",
+            "pages": 200,
+            "author": "نەزانراو",
+            "language": "Kurdish (Sorani)",
+            "coverImage": "https://archive.org/services/img/FrmwdaHawbashakanyBuxariOMslim"
+        },
+        {
+            "id": 3,
+            "title": "فیقهی سوننە بە کوردی",
+            "titleEn": "Fiqh of Sunnah in Kurdish",
+            "category": "fiqh",
+            "categoryKu": "فیقه",
+            "description": "کتێبێکی گرنگ لە بواری فیقهی ئیسلامی کە بابەتەکانی ڕۆژانە وەک نوێژ و ڕۆژوو و زەکات باس دەکات",
+            "descriptionEn": "An important book on Islamic jurisprudence covering daily matters like prayer, fasting, and zakat",
+            "source": "noor-book.com",
+            "downloadUrl": "https://www.noor-book.com/en/ebook-Fiqh-of-the-Sunnah-in-Kurdish-1-pdf",
+            "pdfUrl": null,
+            "pages": 747,
+            "author": "سەید سابق",
+            "language": "Kurdish (Sorani)",
+            "coverImage": null
+        },
+        {
+            "id": 4,
+            "title": "بەحری حەدیس بە کوردی",
+            "titleEn": "Sea of Hadith in Kurdish",
+            "category": "hadith",
+            "categoryKu": "فەرموودە",
+            "description": "کۆمەڵێکی گەورە لە فەرموودەکان کە وەرگێڕاون بۆ زمانی کوردی",
+            "descriptionEn": "A large collection of hadiths translated into Kurdish language",
+            "source": "noor-book.com",
+            "downloadUrl": "https://www.noor-book.com/en/ebook-Bahr-Al-Hadith-is-in-Kurdish-pdf",
+            "pdfUrl": null,
+            "pages": 217,
+            "author": "نەزانراو",
+            "language": "Kurdish (Sorani)",
+            "coverImage": null
+        },
+        {
+            "id": 5,
+            "title": "کتابی توحید بە کوردی",
+            "titleEn": "Book of Tawhid in Kurdish",
+            "category": "aqeedah",
+            "categoryKu": "عەقیدە",
+            "description": "کتێبێکی بنەڕەتی سەبارەت بە یەکتاپەرستی و بنەماکانی بیروباوەڕی ئیسلامی",
+            "descriptionEn": "A fundamental book about monotheism and the foundations of Islamic creed",
+            "source": "archive.org",
+            "downloadUrl": "https://archive.org/details/tawheed_kurdy",
+            "pdfUrl": "https://archive.org/download/tawheed_kurdy/tawheed%20kurdy.pdf",
+            "pages": 150,
+            "author": "محەممەد بن عەبدولوەهاب",
+            "language": "Kurdish (Sorani)",
+            "coverImage": "https://archive.org/services/img/tawheed_kurdy"
+        },
+        {
+            "id": 6,
+            "title": "بنەماکانی ئیسلام",
+            "titleEn": "Foundations of Islam",
+            "category": "aqeedah",
+            "categoryKu": "عەقیدە",
+            "description": "پێناسەکردنی ئەرکانی ئیسلام و بنەماکانی ئایینی پیرۆز",
+            "descriptionEn": "Introduction to the pillars of Islam and foundations of the holy religion",
+            "source": "noor-book.com",
+            "downloadUrl": "https://www.noor-book.com/en/ebook-Foundations-of-Islam-Kurdish-language-pdf",
+            "pdfUrl": null,
+            "pages": 100,
+            "author": "نەزانراو",
+            "language": "Kurdish (Sorani)",
+            "coverImage": null
+        },
+        {
+            "id": 7,
+            "title": "ژیانی پێغەمبەر محەمەد",
+            "titleEn": "Life of Prophet Muhammad",
+            "category": "seerah",
+            "categoryKu": "سیرە",
+            "description": "ژیاننامەی پێغەمبەری ئیسلام لە لەدایکبوون تا کۆچکردن",
+            "descriptionEn": "Biography of the Prophet of Islam from birth to death",
+            "source": "scribd.com",
+            "downloadUrl": "https://www.scribd.com/document/Kurdish-Seerah",
+            "pdfUrl": null,
+            "pages": 300,
+            "author": "نەزانراو",
+            "language": "Kurdish (Sorani)",
+            "coverImage": null
+        },
+        {
+            "id": 8,
+            "title": "کتێبی فیقهی ئاسان",
+            "titleEn": "Easy Fiqh Book",
+            "category": "fiqh",
+            "categoryKu": "فیقه",
+            "description": "کتێبێکی ئاسان بۆ فێربوونی حوکمەکانی ئیسلام لە ژێر ڕۆشنایی سوننەت و قورئان",
+            "descriptionEn": "An easy book for learning Islamic rulings in light of Sunnah and Quran",
+            "source": "kurdipedia.org",
+            "downloadUrl": "https://www.kurdipedia.org/books/103929",
+            "pdfUrl": null,
+            "pages": 250,
+            "author": "نەزانراو",
+            "language": "Kurdish (Sorani)",
+            "coverImage": null
+        },
+        {
+            "id": 9,
+            "title": "زەکات لە ئیسلامدا",
+            "titleEn": "Zakat in Islam",
+            "category": "fiqh",
+            "categoryKu": "فیقه",
+            "description": "ڕوونکردنەوەی حوکمەکانی زەکات و چۆنیەتی دەرکردنی",
+            "descriptionEn": "Explanation of zakat rulings and how to pay it",
+            "source": "archive.org",
+            "downloadUrl": "https://archive.org/details/Zakat_kurdi",
+            "pdfUrl": null,
+            "pages": 80,
+            "author": "نەزانراو",
+            "language": "Kurdish (Sorani)",
+            "coverImage": null
+        },
+        {
+            "id": 10,
+            "title": "ڕۆژوو لە ئیسلامدا",
+            "titleEn": "Fasting in Islam",
+            "category": "fiqh",
+            "categoryKu": "فیقه",
+            "description": "حوکمەکانی ڕۆژوو و مانگی ڕەمەزان و فازڵەتەکانی",
+            "descriptionEn": "Rulings of fasting, Ramadan, and its virtues",
+            "source": "bangawaz.net",
+            "downloadUrl": "https://bangawaz.net/library/fiqh",
+            "pdfUrl": null,
+            "pages": 100,
+            "author": "نەزانراو",
+            "language": "Kurdish (Sorani)",
+            "coverImage": null
+        }
+    ],
+    "categories": [
+        {
+            "id": "hadith",
+            "nameKu": "فەرموودە",
+            "nameEn": "Hadith",
+            "description": "کتێبەکانی فەرموودەی پێغەمبەر",
+            "icon": "📜"
+        },
+        {
+            "id": "fiqh",
+            "nameKu": "فیقه",
+            "nameEn": "Fiqh (Islamic Jurisprudence)",
+            "description": "حوکم و یاساکانی ئیسلامی",
+            "icon": "⚖️"
+        },
+        {
+            "id": "aqeedah",
+            "nameKu": "عەقیدە",
+            "nameEn": "Aqeedah (Islamic Creed)",
+            "description": "بیروباوەڕی ئیسلامی",
+            "icon": "🕌"
+        },
+        {
+            "id": "seerah",
+            "nameKu": "سیرە",
+            "nameEn": "Seerah (Prophet's Biography)",
+            "description": "ژیاننامەی پێغەمبەر",
+            "icon": "📖"
+        }
+    ],
+    "externalLibraries": [
+        {
+            "name": "Bangawaz Academy",
+            "nameKu": "ئەکادیمیای بانگاواز",
+            "url": "https://bangawaz.net",
+            "description": "کتێبخانەی دیجیتاڵی ئیسلامی بە کوردی"
+        },
+        {
+            "name": "KurdPDF",
+            "nameKu": "کورد پی دی ئێف",
+            "url": "https://kurdpdf.com",
+            "description": "کتێبی کوردی بە فۆرماتی PDF"
+        },
+        {
+            "name": "Ktebstan",
+            "nameKu": "کتێبستان",
+            "url": "https://ktebstan.net",
+            "description": "گەورەترین کتێبخانەی ئەلیکترۆنی کوردی"
+        },
+        {
+            "name": "Kurdipedia Library",
+            "nameKu": "کتێبخانەی کوردیپێدیا",
+            "url": "https://kurdipedia.org/library.aspx",
+            "description": "کتێبخانەی فرەبواری کوردی"
+        },
+        {
+            "name": "PDF4Kurd (Archive.org)",
+            "nameKu": "پی دی ئێف بۆ کورد",
+            "url": "https://archive.org/details/@pdf4_kurd",
+            "description": "کۆمەڵێکی گەورە لە کتێبی کوردی لە ئەرشیفی ئینتەرنێت"
+        },
+        {
+            "name": "Noor Library",
+            "nameKu": "کتێبخانەی نوور",
+            "url": "https://www.noor-book.com",
+            "description": "کتێبی ئیسلامی بە زمانەکانی جیاواز"
+        }
+    ]
+}
