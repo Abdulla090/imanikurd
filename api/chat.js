@@ -92,6 +92,7 @@ EXAMPLE FORMAT:
     };
 
     const model = DEFAULT_MODEL;
+    let usedModel = model;
 
     // If streaming is requested
     if (stream) {
@@ -100,6 +101,7 @@ EXAMPLE FORMAT:
         res.setHeader("Connection", "keep-alive");
 
         try {
+            console.log(`[Iman AI] Trying primary model: ${model}`);
             let response = await fetch(
                 `https://generativelanguage.googleapis.com/v1beta/models/${model}:streamGenerateContent?alt=sse&key=${apiKey}`,
                 {
@@ -111,6 +113,10 @@ EXAMPLE FORMAT:
 
             // Fallback model if primary fails
             if (!response.ok) {
+                const errorText = await response.text();
+                console.warn(`[Iman AI] Primary model (${model}) failed: ${response.status}`, errorText);
+                console.log(`[Iman AI] Falling back to: ${FALLBACK_MODEL}`);
+                usedModel = FALLBACK_MODEL;
                 response = await fetch(
                     `https://generativelanguage.googleapis.com/v1beta/models/${FALLBACK_MODEL}:streamGenerateContent?alt=sse&key=${apiKey}`,
                     {
@@ -122,9 +128,16 @@ EXAMPLE FORMAT:
             }
 
             if (!response.ok) {
-                res.write(`data: ${JSON.stringify({ error: "API error" })}\n\n`);
+                const errorText = await response.text();
+                console.error(`[Iman AI] Fallback model also failed: ${response.status}`, errorText);
+                res.write(`data: ${JSON.stringify({ error: "API error", model: usedModel })}\n\n`);
                 return res.end();
             }
+
+            console.log(`[Iman AI] ✅ Using model: ${usedModel}`);
+
+            // Send model info as first SSE event so client knows
+            res.write(`data: ${JSON.stringify({ modelUsed: usedModel })}\n\n`);
 
             // Pipe the SSE stream from Gemini directly to the client
             const reader = response.body.getReader();
@@ -139,6 +152,7 @@ EXAMPLE FORMAT:
 
             return res.end();
         } catch (error) {
+            console.error(`[Iman AI] Stream error:`, error.message);
             res.write(`data: ${JSON.stringify({ error: error.message })}\n\n`);
             return res.end();
         }

@@ -157,6 +157,11 @@ const processSSEStream = async (
         if (!jsonStr || jsonStr === '[DONE]') continue;
         try {
           const parsed = JSON.parse(jsonStr);
+          // Log which model the server is using (sent as first SSE event)
+          if (parsed?.modelUsed) {
+            console.log(`🤖 Iman AI using model: ${parsed.modelUsed}`);
+            continue;
+          }
           const chunk = parsed?.candidates?.[0]?.content?.parts?.[0]?.text;
           if (chunk) {
             fullText += chunk;
