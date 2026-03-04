@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { MessageCircle, X, Send, Loader2, Sparkles, Globe, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -44,102 +44,132 @@ const formatMessage = (text: string): string => {
   return `<div class="chat-content"><p class="chat-paragraph">${formatted}</p></div>`;
 };
 
-// Hardcoded fallback API key for Gemini 3 Flash Preview
-const FALLBACK_API_KEY = "AIzaSyAaWoKBOsns7Yb_BArgwoQQ5tip5KIeMG0";
-const DEFAULT_MODEL = "gemini-3-flash-preview";
-
-// Secure API call - priority to localStorage, then env, then fallback
-const callGeminiAPI = async (messages: Message[], language: "ku" | "en") => {
+// Streaming API call - uses server proxy in production, direct in local dev
+const callGeminiAPIStream = async (
+  messages: Message[],
+  language: "ku" | "en",
+  onChunk: (text: string) => void,
+) => {
+  // Check if there's a locally stored dev key (from SecretKeyPage)
   const localKey = localStorage.getItem("IMAN_K_DEV_GEMINI_KEY");
-  const localModel = localStorage.getItem("IMAN_K_DEV_GEMINI_MODEL") || DEFAULT_MODEL;
   const envKey = import.meta.env.VITE_GEMINI_API_KEY;
 
-  // Priority: localStorage > env > fallback
-  const apiKey = localKey || envKey || FALLBACK_API_KEY;
-  const model = localModel || DEFAULT_MODEL;
+  // If running locally with a dev key, call Gemini directly (dev only)
+  if (localKey || envKey) {
+    return callGeminiDirectStream(messages, language, onChunk, localKey || envKey || "");
+  }
 
-  const systemPrompt = language === 'en'
-    ? `You are a knowledgeable, warm, and helpful Islamic assistant. You help users with questions about Islam, Quran, Hadith, and Islamic practices.
-
-IMPORTANT RESPONSE GUIDELINES:
-1. Give DETAILED and COMPREHENSIVE answers - not too short! Explain thoroughly.
-2. Use **bold** for important terms like Allah, Prophet names, key Islamic concepts
-3. Use ## for section titles/headers when organizing longer answers
-4. When quoting Quran, use: **[Surah Name:Verse Number]** "the verse text"
-5. When quoting Hadith, use: **Hadith:** "hadith text" - **Source**
-6. Use bullet points (-) for lists
-7. Start with a warm Islamic greeting like "Assalamu Alaikum"
-8. End with a kind closing like "May Allah guide you" or "Insha'Allah"
-9. Always cite sources when available
-10. Be educational, respectful, and encouraging
-
-EXAMPLE FORMAT:
-## Title Here
-**Important Term** is explained like this...
-- Point one
-- Point two
-**[Al-Baqarah:255]** "Allah - there is no deity except Him..."`
-
-    : `تۆ یاریدەدەرێکی ئیسلامی گەرم و یاریدەدەرت. یارمەتی بەکارهێنەران دەدەیت لە پرسیارەکان دەربارەی ئیسلام، قورئان، حەدیس و کردارە ئیسلامییەکان.
-
-زۆر گرنگ: هەمیشە وەڵامەکانت بە عەرەبی "السلام عليكم ورحمة الله وبركاته" دەست پێ بکە، بەڵام تەواوی وەڵامەکەت بە کوردی سۆرانی بنووسە!
-
-ڕێنمایی گرنگی وەڵامدانەوە:
-1. وەڵامی تەواو و وردبینانە بدە - نەک کورت! باش ڕوونی بکەرەوە
-2. **سەوزی تاریک ** بەکاربهێنە بۆ زاراوە گرنگەکان وەک خوا، ناوی پێغەمبەران، چەمکە ئیسلامییە سەرەکییەکان
-3. ## بەکاربهێنە بۆ سەردێڕ و ناونیشانی بەشەکان کاتێک وەڵامێکی درێژ دەدەیت
-4. کاتێک ئایەتی قورئان دەهێنیتەوە: **[ناوی سورە:ژمارەی ئایەت]** "دەقی ئایەت"
-5. کاتێک حەدیس دەهێنیتەوە: **حەدیس:** "دەقی حەدیس" - **سەرچاوە**
-6. خاڵی (-) بەکاربهێنە بۆ لیستەکان
-7. کۆتایی بە کوردی بهێنە وەک "خوا ڕێنمایت بکات" یان "ئینشاءاللە"
-8. هەمیشە سەرچاوەکان بخەرەوە
-9. فێرکارانە، ڕێزلێنانەوە و هاندەرانە بە
-
-نموونەی فۆرمات:
-السلام عليكم ورحمة الله وبركاته
-
-## سەردێڕ لێرە
-**زاراوەی گرنگ** بەم شێوەیە ڕوون دەکرێتەوە...
-- خاڵی یەکەم
-- خاڵی دووەم
-**[البقرە:٢٥٥]** "اللە - هیچ خوایەک نییە جگە لە ئەو..."
-
-خوا ڕێنمایت بکات`;
-
-  const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
-    {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        contents: [
-          {
-            role: 'user',
-            parts: [{ text: systemPrompt }]
-          },
-          ...messages.map((msg) => ({
-            role: msg.role === 'assistant' ? 'model' : 'user',
-            parts: [{ text: msg.content }]
-          }))
-        ],
-        generationConfig: {
-          temperature: 0.8,
-          maxOutputTokens: 4096,
-        }
-      }),
-    }
-  );
+  // In production: call the secure server-side proxy
+  const response = await fetch("/api/chat", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ messages, language, stream: true }),
+  });
 
   if (!response.ok) {
-    const errorText = await response.text();
-    console.error('Gemini API error:', response.status, errorText);
     throw new Error(`API error: ${response.status}`);
   }
 
-  const data = await response.json();
-  return data.candidates?.[0]?.content?.parts?.[0]?.text || 'Sorry, I could not generate a response.';
+  const reader = response.body?.getReader();
+  if (!reader) throw new Error("No response body");
+
+  return processSSEStream(reader, onChunk);
+};
+
+// Direct Gemini call (only for local development with personal API key)
+const callGeminiDirectStream = async (
+  messages: Message[],
+  language: "ku" | "en",
+  onChunk: (text: string) => void,
+  apiKey: string,
+) => {
+  const DEFAULT_MODEL = "gemini-3.1-flash-lite-preview";
+  const FALLBACK_MODEL = "gemini-3-flash-preview";
+  const localModel = localStorage.getItem("IMAN_K_DEV_GEMINI_MODEL") || DEFAULT_MODEL;
+
+  const systemPrompt = language === 'en'
+    ? `You are a knowledgeable, warm, and helpful Islamic assistant. You help users with questions about Islam, Quran, Hadith, and Islamic practices.
+IMPORTANT RESPONSE GUIDELINES:
+1. Give DETAILED and COMPREHENSIVE answers. Use **bold** for important terms.
+2. Use ## for section titles. Use bullet points (-) for lists.
+3. Start with "Assalamu Alaikum". End with "May Allah guide you".
+4. Always cite sources when available.`
+    : `تۆ یاریدەدەرێکی ئیسلامی گەرم و یاریدەدەرت. وەڵامی تەواو و وردبینانە بدە.
+هەمیشە بە "السلام عليكم ورحمة الله وبركاته" دەست پێ بکە. تەواوی وەڵامەکەت بە کوردی سۆرانی بنووسە.
+**سەوزی تاریک** بەکاربهێنە بۆ زاراوە گرنگەکان. ## بەکاربهێنە بۆ سەردێڕ.`;
+
+  const requestBody = JSON.stringify({
+    contents: [
+      { role: 'user', parts: [{ text: systemPrompt }] },
+      ...messages.map((msg) => ({
+        role: msg.role === 'assistant' ? 'model' : 'user',
+        parts: [{ text: msg.content }]
+      }))
+    ],
+    generationConfig: { temperature: 0.8, maxOutputTokens: 4096 }
+  });
+
+  const requestOptions = {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: requestBody,
+  };
+
+  let response = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/${localModel}:streamGenerateContent?alt=sse&key=${apiKey}`,
+    requestOptions
+  );
+
+  if (!response.ok) {
+    response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/${FALLBACK_MODEL}:streamGenerateContent?alt=sse&key=${apiKey}`,
+      requestOptions
+    );
+    if (!response.ok) throw new Error(`API error: ${response.status}`);
+  }
+
+  const reader = response.body?.getReader();
+  if (!reader) throw new Error('No response body');
+
+  return processSSEStream(reader, onChunk);
+};
+
+// Shared SSE stream processor
+const processSSEStream = async (
+  reader: ReadableStreamDefaultReader<Uint8Array>,
+  onChunk: (text: string) => void,
+) => {
+  const decoder = new TextDecoder();
+  let fullText = '';
+  let buffer = '';
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+
+    buffer += decoder.decode(value, { stream: true });
+    const lines = buffer.split('\n');
+    buffer = lines.pop() || '';
+
+    for (const line of lines) {
+      if (line.startsWith('data: ')) {
+        const jsonStr = line.slice(6).trim();
+        if (!jsonStr || jsonStr === '[DONE]') continue;
+        try {
+          const parsed = JSON.parse(jsonStr);
+          const chunk = parsed?.candidates?.[0]?.content?.parts?.[0]?.text;
+          if (chunk) {
+            fullText += chunk;
+            onChunk(fullText);
+          }
+        } catch {
+          // Skip malformed JSON
+        }
+      }
+    }
+  }
+
+  return fullText || 'Sorry, I could not generate a response.';
 };
 
 export function ChatBubble() {
@@ -163,6 +193,13 @@ export function ChatBubble() {
     scrollToBottom();
   }, [messages]);
 
+  // Listen for programmatic open events (from nav links, etc.)
+  useEffect(() => {
+    const handleOpen = () => setIsOpen(true);
+    window.addEventListener('open-chat-bubble', handleOpen);
+    return () => window.removeEventListener('open-chat-bubble', handleOpen);
+  }, []);
+
   // Prevent body scroll when chat is open on mobile
   useEffect(() => {
     if (isOpen) {
@@ -175,34 +212,49 @@ export function ChatBubble() {
     };
   }, [isOpen]);
 
-  const sendMessage = async () => {
-    if (!input.trim() || isLoading) return;
+  // Stream a message to the AI and progressively render the response
+  const streamMessage = useCallback(async (text: string, currentMessages: Message[]) => {
+    const userMessage: Message = { role: "user", content: text };
+    const allMessages = [...currentMessages, userMessage];
 
-    const userMessage: Message = { role: "user", content: input };
-    setMessages((prev) => [...prev, userMessage]);
+    // Add user message + empty assistant placeholder
+    setMessages([...allMessages, { role: "assistant", content: "" }]);
     setInput("");
     setIsLoading(true);
 
     try {
-      const responseText = await callGeminiAPI([...messages, userMessage], language);
-
-      const assistantMessage: Message = {
-        role: "assistant",
-        content: responseText,
-      };
-      setMessages((prev) => [...prev, assistantMessage]);
+      await callGeminiAPIStream(
+        allMessages,
+        language,
+        (streamedText) => {
+          // Update the last message (assistant) with the streamed content
+          setMessages((prev) => {
+            const updated = [...prev];
+            updated[updated.length - 1] = { role: "assistant", content: streamedText };
+            return updated;
+          });
+        },
+      );
     } catch (error) {
       console.error("Error sending message:", error);
-      const errorMessage: Message = {
-        role: "assistant",
-        content: language === "ku"
-          ? "ببورە، هەڵەیەک ڕوویدا. تکایە دووبارە هەوڵبدەوە."
-          : "Sorry, an error occurred. Please try again.",
-      };
-      setMessages((prev) => [...prev, errorMessage]);
+      setMessages((prev) => {
+        const updated = [...prev];
+        updated[updated.length - 1] = {
+          role: "assistant",
+          content: language === "ku"
+            ? "ببورە، هەڵەیەک ڕوویدا. تکایە دووبارە هەوڵبدەوە."
+            : "Sorry, an error occurred. Please try again.",
+        };
+        return updated;
+      });
     } finally {
       setIsLoading(false);
     }
+  }, [language, messages]);
+
+  const sendMessage = async () => {
+    if (!input.trim() || isLoading) return;
+    await streamMessage(input, messages);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -212,12 +264,25 @@ export function ChatBubble() {
     }
   };
 
-  const suggestedQuestions = [
+  const suggestedQuestionsKu = [
     "چۆن نوێژ بکەم؟",
     "ڕۆژوو چییە؟",
     "حەج چییە؟",
     "زەکات چۆن دەدرێت؟",
+    "سورەتی الفاتحە باسبکە",
+    "چۆن دوعا بکەم؟",
   ];
+
+  const suggestedQuestionsEn = [
+    "How do I pray?",
+    "What is Ramadan?",
+    "Tell me about Hajj",
+    "How to calculate Zakat?",
+    "Explain Surah Al-Fatiha",
+    "How to make Dua?",
+  ];
+
+  const suggestedQuestions = language === "ku" ? suggestedQuestionsKu : suggestedQuestionsEn;
 
   return (
     <>
@@ -324,20 +389,26 @@ export function ChatBubble() {
                 </div>
               </div>
 
-              {/* Using Gemini 3 Flash Preview indicator */}
+              {/* Using Gemini 3.1 Flash Lite Preview indicator */}
               <div className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-4 py-1.5 text-[10px] text-center border-b border-emerald-500/20 flex items-center justify-center gap-2">
                 <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
-                {language === "ku" ? "ئیمان - زیرەکی دەستکرد" : "Iman AI - Islamic Assistant"}
+                {language === "ku" ? "ئیمان - زیرەکی دەستکرد (Gemini 3.1 Flash Lite)" : "Iman AI - Gemini 3.1 Flash Lite Preview"}
               </div>
 
-              {/* Language Indicator */}
+              {/* Language Toggle - Clickable */}
               <div className="px-4 py-2 bg-muted/50 border-b border-border flex items-center justify-center gap-2 text-sm">
-                <span className={`px-3 py-1 rounded-full transition-colors ${language === "ku" ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}>
+                <button
+                  onClick={() => setLanguage("ku")}
+                  className={`px-3 py-1 rounded-full transition-colors ${language === "ku" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted"}`}
+                >
                   کوردی ☀️
-                </span>
-                <span className={`px-3 py-1 rounded-full transition-colors ${language === "en" ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}>
+                </button>
+                <button
+                  onClick={() => setLanguage("en")}
+                  className={`px-3 py-1 rounded-full transition-colors ${language === "en" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted"}`}
+                >
                   English 🇬🇧
-                </span>
+                </button>
               </div>
 
               {/* Messages Area */}
@@ -348,19 +419,26 @@ export function ChatBubble() {
                       <Sparkles className="w-8 h-8 text-primary" />
                     </div>
                     <p className="font-naskh text-xl mb-2 text-foreground">
-                      سڵاو لەسەرتان! 👋
+                      {language === "ku" ? "سڵاو لەسەرتان! 👋" : "Hello there! 👋"}
                     </p>
                     <p className="text-muted-foreground text-sm mb-6">
-                      من ئیمانم، یاریدەدەری زیرەکی تۆ
+                      {language === "ku" ? "من ئیمانم، یاریدەدەری زیرەکی تۆ" : "I'm Iman, your intelligent Islamic assistant"}
                     </p>
+                  </div>
+                )}
 
-                    {/* Suggested Questions */}
+                {/* Show suggestion chips when only the initial welcome message exists */}
+                {messages.length <= 1 && !isLoading && (
+                  <div className="py-2">
+                    <p className="text-center text-xs text-muted-foreground mb-3">
+                      {language === "ku" ? "پرسیارێک هەڵبژێرە:" : "Choose a question:"}
+                    </p>
                     <div className="flex flex-wrap justify-center gap-2">
                       {suggestedQuestions.map((question, index) => (
                         <button
-                          key={index}
-                          onClick={() => setInput(question)}
-                          className="px-3 py-2 bg-muted hover:bg-primary/20 rounded-xl text-xs transition-colors border border-border hover:border-primary/30"
+                          key={`${language}-${index}`}
+                          onClick={() => streamMessage(question, messages)}
+                          className="px-3 py-2 bg-muted hover:bg-primary/20 rounded-xl text-xs transition-all border border-border hover:border-primary/30 hover:shadow-sm active:scale-95"
                         >
                           {question}
                         </button>
@@ -394,11 +472,11 @@ export function ChatBubble() {
                   </div>
                 ))}
 
-                {isLoading && (
+                {isLoading && messages[messages.length - 1]?.content === "" && (
                   <div className="flex justify-end animate-fade-in" style={{ animationDuration: "0.1s" }}>
                     <div className="bg-muted p-3 rounded-2xl rounded-tl-none flex items-center gap-2 border border-border">
                       <Loader2 className="w-4 h-4 animate-spin text-primary" />
-                      <span className="text-sm text-muted-foreground">چاوەڕوان بە...</span>
+                      <span className="text-sm text-muted-foreground">{language === "ku" ? "چاوەڕوان بە..." : "Thinking..."}</span>
                     </div>
                   </div>
                 )}

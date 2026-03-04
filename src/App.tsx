@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation, Navigate } from "react-router-dom";
 import { lazy, Suspense, useState, useEffect, memo } from "react";
 import { AnimatePresence } from "framer-motion";
 
@@ -24,7 +24,8 @@ const NamesOfAllahPage = lazy(() => import("./pages/NamesOfAllahPage"));
 const CompanionsPage = lazy(() => import("./pages/CompanionsPage"));
 const SeerahPage = lazy(() => import("./pages/SeerahPage"));
 const LibraryPage = lazy(() => import("./pages/LibraryPage"));
-const ChatbotPage = lazy(() => import("./pages/ChatbotPage"));
+const MediaPage = lazy(() => import("./pages/MediaPage"));
+
 const RamadanPage = lazy(() => import("./pages/RamadanPage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
@@ -56,18 +57,22 @@ const SuspenseLoader = memo(() => (
 ));
 SuspenseLoader.displayName = 'SuspenseLoader';
 
-// ChatBubble wrapper - only shows on home page
-const HomeOnlyChatBubble = memo(() => {
-  const location = useLocation();
-
-  // Only show on home page
-  if (location.pathname !== "/") {
-    return null;
-  }
-
+// ChatBubble wrapper - shows on all pages
+const GlobalChatBubble = memo(() => {
   return <ChatBubble />;
 });
-HomeOnlyChatBubble.displayName = 'HomeOnlyChatBubble';
+GlobalChatBubble.displayName = 'GlobalChatBubble';
+
+// Redirect /chat to home while opening the chat bubble
+const ChatRedirect = () => {
+  useEffect(() => {
+    // Small delay to ensure ChatBubble is mounted
+    setTimeout(() => {
+      window.dispatchEvent(new Event('open-chat-bubble'));
+    }, 100);
+  }, []);
+  return <Navigate to="/" replace />;
+};
 
 const App = () => {
   const [initialLoading, setInitialLoading] = useState(true);
@@ -115,7 +120,7 @@ const App = () => {
           />
         )}
 
-        <BrowserRouter>
+        <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
           <AutoScrollToTop />
           <OfflineIndicator />
 
@@ -139,15 +144,16 @@ const App = () => {
                 <Route path="/seerah" element={<PageTransition><SeerahPage /></PageTransition>} />
                 <Route path="/companions" element={<PageTransition><CompanionsPage /></PageTransition>} />
                 <Route path="/library" element={<PageTransition><LibraryPage /></PageTransition>} />
-                <Route path="/chat" element={<PageTransition><ChatbotPage /></PageTransition>} />
+                <Route path="/media" element={<PageTransition><MediaPage /></PageTransition>} />
+                <Route path="/chat" element={<ChatRedirect />} />
                 <Route path="/ramadan" element={<PageTransition><RamadanPage /></PageTransition>} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </AnimatePresence>
           </Suspense>
 
-          {/* Chat Bubble - Only on home page */}
-          <HomeOnlyChatBubble />
+          {/* Chat Bubble - Available on all pages */}
+          <GlobalChatBubble />
         </BrowserRouter>
       </TooltipProvider>
     </QueryClientProvider>

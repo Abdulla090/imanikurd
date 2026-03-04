@@ -118,6 +118,18 @@
       <p class="app-name">ئیمان</p>
     </div>
   </div>
+  <!-- Unregister stale service workers from previous builds -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(function(registrations) {
+        registrations.forEach(function(registration) {
+          registration.unregister().then(function() {
+            console.log('Stale service worker removed');
+          });
+        });
+      });
+    }
+  </script>
   <script type="module" src="/src/main.tsx"></script>
 </body>
 

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Key, Save, Trash2, Eye, EyeOff, Sparkles, Zap } from "lucide-react";
+import { Key, Save, Trash2, Eye, EyeOff, Sparkles, Zap, Rocket } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Navigation } from "@/components/Navigation";
@@ -10,11 +10,19 @@ import { toast } from "sonner";
 // Available Gemini models
 const GEMINI_MODELS = [
     {
+        id: "gemini-3.1-flash-lite-preview",
+        name: "Gemini 3.1 Flash Lite Preview",
+        description: "نوێترین و خێراترین - زۆر خێرا و کەم تێچوو",
+        icon: Rocket,
+        badge: "NEW",
+        badgeColor: "bg-purple-500"
+    },
+    {
         id: "gemini-3-flash-preview",
         name: "Gemini 3 Flash Preview",
-        description: "نوێترین و باشترین - زۆر خێرا و زیرەک",
+        description: "زیرەک و بەهێز - بنەڕەتی پشتگیری",
         icon: Sparkles,
-        badge: "NEW",
+        badge: "FALLBACK",
         badgeColor: "bg-emerald-500"
     },
     {
@@ -30,7 +38,7 @@ const GEMINI_MODELS = [
 export default function SecretKeyPage() {
     const [key, setKey] = useState("");
     const [showKey, setShowKey] = useState(false);
-    const [model, setModel] = useState("gemini-3-flash-preview");
+    const [model, setModel] = useState("gemini-3.1-flash-lite-preview");
 
     useEffect(() => {
         const savedKey = localStorage.getItem("IMAN_K_DEV_GEMINI_KEY");
@@ -49,7 +57,7 @@ export default function SecretKeyPage() {
         localStorage.removeItem("IMAN_K_DEV_GEMINI_KEY");
         localStorage.removeItem("IMAN_K_DEV_GEMINI_MODEL");
         setKey("");
-        setModel("gemini-3-flash-preview");
+        setModel("gemini-3.1-flash-lite-preview");
         toast.success("ڕێکخستنەکان سڕانەوە");
     };
 

@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import {
     Book, ScrollText, FileText, ListChecks, GraduationCap,
-    Sparkles, Star, Clock, Moon, Circle, Calculator, Scale, Users, BookOpen, Library, Bot
+    Sparkles, Star, Clock, Moon, Circle, Calculator, Scale, Users, BookOpen, Library, Bot, Tv
 } from "lucide-react";
 import { Navigation } from "@/components/Navigation";
 import { GeometricPattern } from "@/components/GeometricPattern";
@@ -31,6 +31,7 @@ const allFeatures = [
         description: "پرسیارەکانت لەسەر ئیسلام بکە و وەڵامی زیرەک وەربگرە",
         link: "/chat",
         color: "bg-violet-500/10 text-violet-600",
+        action: () => window.dispatchEvent(new Event('open-chat-bubble')),
     },
     {
         icon: BookOpen,
@@ -55,6 +56,14 @@ const allFeatures = [
         description: "کتێب، وتار، دەنگ و ڤیدیۆی ئیسلامی بە کوردی",
         link: "/library",
         color: "bg-purple-500/10 text-purple-600",
+    },
+    {
+        icon: Tv,
+        title: "میدیای ئیسلامی",
+        subtitle: "پۆدکاست و ڤیدیۆ",
+        description: "پۆدکاستی ئیسلامی، وتاری کوردی و عەرەبی و تلاوەتی قورئان",
+        link: "/media",
+        color: "bg-red-500/10 text-red-600",
     },
     {
         icon: Clock,
@@ -162,35 +171,67 @@ export default function StartPage() {
                                 whileHover={{ y: -5 }}
                                 className="group"
                             >
-                                <Link to={feature.link} className="feature-card block h-full p-6 relative overflow-hidden">
-                                    <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-bl-full -mr-16 -mt-16 transition-all group-hover:bg-primary/10" />
+                                {feature.action ? (
+                                    <div onClick={feature.action} className="feature-card block h-full p-6 relative overflow-hidden cursor-pointer">
+                                        <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-bl-full -mr-16 -mt-16 transition-all group-hover:bg-primary/10" />
 
-                                    <div className="flex items-start gap-5">
-                                        <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 transition-transform group-hover:scale-110 ${feature.color}`}>
-                                            <feature.icon className="w-7 h-7" />
+                                        <div className="flex items-start gap-5">
+                                            <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 transition-transform group-hover:scale-110 ${feature.color}`}>
+                                                <feature.icon className="w-7 h-7" />
+                                            </div>
+                                            <div className="space-y-1">
+                                                <h3 className="font-naskh text-xl font-bold text-foreground group-hover:text-primary transition-colors">
+                                                    {feature.title}
+                                                </h3>
+                                                <p className="text-sm font-medium text-primary/80">
+                                                    {feature.subtitle}
+                                                </p>
+                                                <p className="text-sm text-muted-foreground leading-relaxed">
+                                                    {feature.description}
+                                                </p>
+                                            </div>
                                         </div>
-                                        <div className="space-y-1">
-                                            <h3 className="font-naskh text-xl font-bold text-foreground group-hover:text-primary transition-colors">
-                                                {feature.title}
-                                            </h3>
-                                            <p className="text-sm font-medium text-primary/80">
-                                                {feature.subtitle}
-                                            </p>
-                                            <p className="text-sm text-muted-foreground leading-relaxed">
-                                                {feature.description}
-                                            </p>
+
+                                        <div className="mt-6 flex justify-end">
+                                            <motion.div
+                                                className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-all"
+                                                whileHover={{ x: -3 }}
+                                            >
+                                                <Sparkles className="w-4 h-4" />
+                                            </motion.div>
                                         </div>
                                     </div>
+                                ) : (
+                                    <Link to={feature.link} className="feature-card block h-full p-6 relative overflow-hidden">
+                                        <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-bl-full -mr-16 -mt-16 transition-all group-hover:bg-primary/10" />
 
-                                    <div className="mt-6 flex justify-end">
-                                        <motion.div
-                                            className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-all"
-                                            whileHover={{ x: -3 }}
-                                        >
-                                            <Sparkles className="w-4 h-4" />
-                                        </motion.div>
-                                    </div>
-                                </Link>
+                                        <div className="flex items-start gap-5">
+                                            <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 transition-transform group-hover:scale-110 ${feature.color}`}>
+                                                <feature.icon className="w-7 h-7" />
+                                            </div>
+                                            <div className="space-y-1">
+                                                <h3 className="font-naskh text-xl font-bold text-foreground group-hover:text-primary transition-colors">
+                                                    {feature.title}
+                                                </h3>
+                                                <p className="text-sm font-medium text-primary/80">
+                                                    {feature.subtitle}
+                                                </p>
+                                                <p className="text-sm text-muted-foreground leading-relaxed">
+                                                    {feature.description}
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        <div className="mt-6 flex justify-end">
+                                            <motion.div
+                                                className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-all"
+                                                whileHover={{ x: -3 }}
+                                            >
+                                                <Sparkles className="w-4 h-4" />
+                                            </motion.div>
+                                        </div>
+                                    </Link>
+                                )}
                             </motion.div>
                         ))}
                     </div>

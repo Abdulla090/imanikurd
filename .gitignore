@@ -30,3 +30,8 @@ dist-ssr
 *.sln
 *.sw?
 
+# Vercel
+.vercel
+
+# Temp
+temp_audio/

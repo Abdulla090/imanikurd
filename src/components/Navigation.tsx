@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Book, Home, Menu, X, ScrollText, ListChecks, Moon, Sun, Clock, Sparkles, Circle, Calculator, Scale, ChevronDown, BookOpen, Users, Library, Bot } from "lucide-react";
+import { Book, Home, Menu, X, ScrollText, ListChecks, Moon, Sun, Clock, Sparkles, Circle, Calculator, Scale, ChevronDown, BookOpen, Users, Library, Bot, Tv } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { QiblaIndicator } from "./QiblaIndicator";
 
@@ -16,7 +16,8 @@ const mainNavItems = [
 
 // Items shown in "More" dropdown on desktop
 const moreNavItems = [
-  { name: "یاریدەدەری AI", path: "/chat", icon: Bot },
+  { name: "یاریدەدەری AI", path: "/chat", icon: Bot, action: () => window.dispatchEvent(new Event('open-chat-bubble')) },
+  { name: "میدیای ئیسلامی", path: "/media", icon: Tv },
   { name: "ئەزکار", path: "/azkar", icon: Sparkles },
   { name: "تەسبیح", path: "/tasbih", icon: Circle },
   { name: "شوێنکەوتن", path: "/tracker", icon: ListChecks },
@@ -113,17 +114,28 @@ export function Navigation() {
                       >
                         <div className="grid grid-cols-2 gap-2 w-72">
                           {moreNavItems.map((item) => (
-                            <Link
-                              key={item.path}
-                              to={item.path}
-                              className={`flex items-center gap-2 px-3 py-2.5 text-sm rounded-xl transition-colors ${location.pathname === item.path
-                                ? "bg-primary/10 text-primary"
-                                : "text-foreground hover:bg-muted"
-                                }`}
-                            >
-                              <item.icon className="w-4 h-4" />
-                              <span className="whitespace-nowrap">{item.name}</span>
-                            </Link>
+                            item.action ? (
+                              <button
+                                key={item.path}
+                                onClick={() => { item.action(); setIsMoreOpen(false); }}
+                                className={`flex items-center gap-2 px-3 py-2.5 text-sm rounded-xl transition-colors text-foreground hover:bg-muted w-full`}
+                              >
+                                <item.icon className="w-4 h-4" />
+                                <span className="whitespace-nowrap">{item.name}</span>
+                              </button>
+                            ) : (
+                              <Link
+                                key={item.path}
+                                to={item.path}
+                                className={`flex items-center gap-2 px-3 py-2.5 text-sm rounded-xl transition-colors ${location.pathname === item.path
+                                  ? "bg-primary/10 text-primary"
+                                  : "text-foreground hover:bg-muted"
+                                  }`}
+                              >
+                                <item.icon className="w-4 h-4" />
+                                <span className="whitespace-nowrap">{item.name}</span>
+                              </Link>
+                            )
                           ))}
                         </div>
                       </motion.div>
@@ -205,18 +217,29 @@ export function Navigation() {
 
                   {/* No staggered animations - instant render for performance */}
                   {allNavItems.map((item) => (
-                    <Link
-                      key={item.path}
-                      to={item.path}
-                      onClick={() => setIsOpen(false)}
-                      className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${location.pathname === item.path
-                        ? "bg-primary text-primary-foreground"
-                        : "text-foreground hover:bg-muted"
-                        }`}
-                    >
-                      <item.icon className="w-5 h-5" />
-                      {item.name}
-                    </Link>
+                    'action' in item && item.action ? (
+                      <button
+                        key={item.path}
+                        onClick={() => { (item as any).action(); setIsOpen(false); }}
+                        className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-colors text-foreground hover:bg-muted w-full`}
+                      >
+                        <item.icon className="w-5 h-5" />
+                        {item.name}
+                      </button>
+                    ) : (
+                      <Link
+                        key={item.path}
+                        to={item.path}
+                        onClick={() => setIsOpen(false)}
+                        className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${location.pathname === item.path
+                          ? "bg-primary text-primary-foreground"
+                          : "text-foreground hover:bg-muted"
+                          }`}
+                      >
+                        <item.icon className="w-5 h-5" />
+                        {item.name}
+                      </Link>
+                    )
                   ))}
 
                   {/* Dark Mode Toggle - Mobile */}

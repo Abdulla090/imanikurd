@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { Book, ScrollText, FileText, ListChecks, GraduationCap, Sparkles, Star, RefreshCw, Clock, MessageCircle, Moon, Circle, BookOpen, Users, Bot, Library } from "lucide-react";
+import { Book, ScrollText, FileText, ListChecks, GraduationCap, Sparkles, Star, RefreshCw, Clock, MessageCircle, Moon, Circle, BookOpen, Users, Bot, Library, Tv } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Navigation } from "@/components/Navigation";
 import { GeometricPattern } from "@/components/GeometricPattern";
@@ -323,9 +323,9 @@ export default function Index() {
               </Link>
 
               {/* AI Assistant Card */}
-              <Link
-                to="/chat"
-                className="relative overflow-hidden rounded-3xl h-36 group"
+              <button
+                onClick={() => window.dispatchEvent(new Event('open-chat-bubble'))}
+                className="relative overflow-hidden rounded-3xl h-36 group w-full text-left"
               >
                 <div className="absolute inset-0 bg-gradient-to-br from-violet-900/90 to-purple-800/80" />
                 <div className="absolute top-0 left-0 w-20 h-20 bg-violet-400/20 rounded-full blur-xl -translate-y-1/2" />
@@ -343,7 +343,7 @@ export default function Index() {
                 </div>
 
                 <div className="absolute inset-0 bg-white/5 opacity-0 group-active:opacity-100 transition-opacity" />
-              </Link>
+              </button>
 
               {/* Names of Allah Card */}
               <Link
@@ -383,6 +383,28 @@ export default function Index() {
                   </div>
                   <div className="w-14 h-14 rounded-2xl bg-white/10 backdrop-blur-sm flex items-center justify-center">
                     <Library className="w-7 h-7 text-white" />
+                  </div>
+                </div>
+
+                <div className="absolute inset-0 bg-white/5 opacity-0 group-active:opacity-100 transition-opacity" />
+              </Link>
+
+              {/* Islamic Media Card */}
+              <Link
+                to="/media"
+                className="col-span-2 relative overflow-hidden rounded-3xl h-32 group"
+              >
+                <div className="absolute inset-0 bg-gradient-to-br from-red-900/90 via-orange-800/80 to-amber-700/70" />
+                <div className="absolute top-0 right-0 w-32 h-32 bg-red-400/20 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2" />
+                <div className="absolute bottom-0 left-0 w-24 h-24 bg-orange-400/20 rounded-full blur-2xl translate-y-1/2 -translate-x-1/2" />
+
+                <div className="relative z-10 h-full p-5 flex items-center justify-between">
+                  <div>
+                    <p className="text-lg text-white/90 font-bold mb-1">میدیای ئیسلامی</p>
+                    <p className="text-xs text-white/60">پۆدکاست، وتار و ڤیدیۆی ئیسلامی</p>
+                  </div>
+                  <div className="w-14 h-14 rounded-2xl bg-white/10 backdrop-blur-sm flex items-center justify-center">
+                    <Tv className="w-7 h-7 text-white" />
                   </div>
                 </div>
 
