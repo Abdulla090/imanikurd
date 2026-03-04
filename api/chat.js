@@ -1,9 +1,6 @@
 // Vercel Serverless Function - Proxies Gemini API calls
 // This keeps the API key on the server side, never exposed to the client
 
-const DEFAULT_MODEL = "gemini-3.1-flash-lite-preview";
-const FALLBACK_MODEL = "gemini-3-flash-preview";
-
 export default async function handler(req, res) {
     // Only allow POST
     if (req.method !== "POST") {
@@ -91,8 +88,12 @@ EXAMPLE FORMAT:
         },
     };
 
-    const model = DEFAULT_MODEL;
-    let usedModel = model;
+    const MODELS = [
+        "gemini-3.1-flash-lite-preview",
+        "gemini-3-flash-preview",
+        "gemini-2.5-flash",
+        "gemini-2.5-flash-lite",
+    ];
 
     // If streaming is requested
     if (stream) {
@@ -101,42 +102,34 @@ EXAMPLE FORMAT:
         res.setHeader("Connection", "keep-alive");
 
         try {
-            console.log(`[Iman AI] Trying primary model: ${model}`);
-            let response = await fetch(
-                `https://generativelanguage.googleapis.com/v1beta/models/${model}:streamGenerateContent?alt=sse&key=${apiKey}`,
-                {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(requestBody),
-                }
-            );
+            let response = null;
+            let usedModel = MODELS[0];
 
-            // Fallback model if primary fails
-            if (!response.ok) {
-                const errorText = await response.text();
-                console.warn(`[Iman AI] Primary model (${model}) failed: ${response.status}`, errorText);
-                console.log(`[Iman AI] Falling back to: ${FALLBACK_MODEL}`);
-                usedModel = FALLBACK_MODEL;
+            // Try each model in order until one works
+            for (const model of MODELS) {
+                console.log(`[Iman AI] Trying model: ${model}`);
                 response = await fetch(
-                    `https://generativelanguage.googleapis.com/v1beta/models/${FALLBACK_MODEL}:streamGenerateContent?alt=sse&key=${apiKey}`,
+                    `https://generativelanguage.googleapis.com/v1beta/models/${model}:streamGenerateContent?alt=sse&key=${apiKey}`,
                     {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify(requestBody),
                     }
                 );
+                if (response.ok) {
+                    usedModel = model;
+                    console.log(`[Iman AI] ✅ Using model: ${model}`);
+                    break;
+                }
+                console.warn(`[Iman AI] Model ${model} failed: ${response.status}`);
             }
 
-            if (!response.ok) {
-                const errorText = await response.text();
-                console.error(`[Iman AI] Fallback model also failed: ${response.status}`, errorText);
-                res.write(`data: ${JSON.stringify({ error: "API error", model: usedModel })}\n\n`);
+            if (!response || !response.ok) {
+                res.write(`data: ${JSON.stringify({ error: "All models failed" })}\n\n`);
                 return res.end();
             }
 
-            console.log(`[Iman AI] ✅ Using model: ${usedModel}`);
-
-            // Send model info as first SSE event so client knows
+            // Send model info as first SSE event
             res.write(`data: ${JSON.stringify({ modelUsed: usedModel })}\n\n`);
 
             // Pipe the SSE stream from Gemini directly to the client
@@ -160,28 +153,23 @@ EXAMPLE FORMAT:
 
     // Non-streaming fallback
     try {
-        let response = await fetch(
-            `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
-            {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(requestBody),
-            }
-        );
+        let response = null;
 
-        if (!response.ok) {
+        for (const model of MODELS) {
             response = await fetch(
-                `https://generativelanguage.googleapis.com/v1beta/models/${FALLBACK_MODEL}:generateContent?key=${apiKey}`,
+                `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
                 {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(requestBody),
                 }
             );
+            if (response.ok) break;
+            console.warn(`[Iman AI] Non-stream: Model ${model} failed: ${response.status}`);
         }
 
-        if (!response.ok) {
-            return res.status(response.status).json({ error: "Gemini API error" });
+        if (!response || !response.ok) {
+            return res.status(500).json({ error: "All models failed" });
         }
 
         const data = await response.json();

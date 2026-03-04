@@ -83,9 +83,12 @@ const callGeminiDirectStream = async (
   onChunk: (text: string) => void,
   apiKey: string,
 ) => {
-  const DEFAULT_MODEL = "gemini-3.1-flash-lite-preview";
-  const FALLBACK_MODEL = "gemini-3-flash-preview";
-  const localModel = localStorage.getItem("IMAN_K_DEV_GEMINI_MODEL") || DEFAULT_MODEL;
+  const MODELS = [
+    localStorage.getItem("IMAN_K_DEV_GEMINI_MODEL") || "gemini-3.1-flash-lite-preview",
+    "gemini-3-flash-preview",
+    "gemini-2.5-flash",
+    "gemini-2.5-flash-lite",
+  ];
 
   const systemPrompt = language === 'en'
     ? `You are a knowledgeable, warm, and helpful Islamic assistant. You help users with questions about Islam, Quran, Hadith, and Islamic practices.
@@ -115,18 +118,21 @@ IMPORTANT RESPONSE GUIDELINES:
     body: requestBody,
   };
 
-  let response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/${localModel}:streamGenerateContent?alt=sse&key=${apiKey}`,
-    requestOptions
-  );
-
-  if (!response.ok) {
+  // Try each model in order until one works
+  let response: Response | null = null;
+  for (const model of MODELS) {
     response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${FALLBACK_MODEL}:streamGenerateContent?alt=sse&key=${apiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/${model}:streamGenerateContent?alt=sse&key=${apiKey}`,
       requestOptions
     );
-    if (!response.ok) throw new Error(`API error: ${response.status}`);
+    if (response.ok) {
+      console.log(`🤖 Using model: ${model}`);
+      break;
+    }
+    console.warn(`Model ${model} failed (${response.status}), trying next...`);
   }
+
+  if (!response || !response.ok) throw new Error('All models failed');
 
   const reader = response.body?.getReader();
   if (!reader) throw new Error('No response body');
@@ -394,11 +400,7 @@ export function ChatBubble() {
                 </div>
               </div>
 
-              {/* Using Gemini 3.1 Flash Lite Preview indicator */}
-              <div className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-4 py-1.5 text-[10px] text-center border-b border-emerald-500/20 flex items-center justify-center gap-2">
-                <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
-                {language === "ku" ? "ئیمان - زیرەکی دەستکرد (Gemini 3.1 Flash Lite)" : "Iman AI - Gemini 3.1 Flash Lite Preview"}
-              </div>
+
 
               {/* Language Toggle - Clickable */}
               <div className="px-4 py-2 bg-muted/50 border-b border-border flex items-center justify-center gap-2 text-sm">
