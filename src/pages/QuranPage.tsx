@@ -1,19 +1,17 @@
-import { useState, useEffect, useMemo, useRef } from "react";
-import { motion } from "framer-motion";
+import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { BookOpen, Loader2, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Navigation } from "@/components/Navigation";
 import { GeometricPattern } from "@/components/GeometricPattern";
 import { toast } from "sonner";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { useTafsirCache } from "@/hooks/useTafsirCache";
 
 // Import Quran components
 import {
   Surah,
   AyahWithTranslation,
-  TafsirData,
   Qari,
-  TAFSIR_OPTIONS,
   QARI_OPTIONS,
   SURAHS_DATA,
   SurahList,
@@ -25,7 +23,7 @@ import {
 } from "@/components/quran";
 
 export default function QuranPage() {
-  const [surahs, setSurahs] = useState<Surah[]>(SURAHS_DATA);
+  const [surahs] = useState<Surah[]>(SURAHS_DATA);
   const [selectedSurah, setSelectedSurah] = useState<Surah | null>(null);
   const [ayahs, setAyahs] = useState<AyahWithTranslation[]>([]);
   const [currentAyahIndex, setCurrentAyahIndex] = useState(0);
@@ -34,9 +32,9 @@ export default function QuranPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [showTafsir, setShowTafsir] = useState(true);
   const [viewMode, setViewMode] = useState<"card" | "list" | "book">("list");
-  const [tafsirData, setTafsirData] = useState<TafsirData>({});
-  const [tafsirLoaded, setTafsirLoaded] = useState(false);
-  const [selectedTafsir, setSelectedTafsir] = useState("rebar");
+
+  // Use cached tafsir hook — prioritizes parsing the current surah first
+  const { tafsirData, tafsirLoaded, selectedTafsir, setSelectedTafsir, loadForSurah } = useTafsirCache(selectedSurah?.number);
 
   // Pagination Logic for Book View
   const paginatedPages = useMemo(() => {
@@ -47,7 +45,8 @@ export default function QuranPage() {
     let currentPage: AyahWithTranslation[] = [];
     let currentChars = 0;
 
-    ayahs.forEach((ayah) => {
+    for (let i = 0; i < ayahs.length; i++) {
+      const ayah = ayahs[i];
       if (currentChars + ayah.text.length > CHARS_PER_PAGE && currentPage.length > 0) {
         pages.push(currentPage);
         currentPage = [];
@@ -55,7 +54,7 @@ export default function QuranPage() {
       }
       currentPage.push(ayah);
       currentChars += ayah.text.length;
-    });
+    }
 
     if (currentPage.length > 0) {
       pages.push(currentPage);
@@ -76,52 +75,58 @@ export default function QuranPage() {
   const [loadedQariId, setLoadedQariId] = useState<string | null>(null);
 
   // Get audio URL for surah
-  const getAudioUrl = (surahNum: number) => selectedQari.getUrl(surahNum);
+  const getAudioUrl = useCallback(
+    (surahNum: number) => selectedQari.getUrl(surahNum),
+    [selectedQari]
+  );
 
   // Load audio
-  const loadAudio = async (surahNum: number, qariId: string): Promise<boolean> => {
-    if (!audioRef.current) return false;
+  const loadAudio = useCallback(
+    async (surahNum: number, qariId: string): Promise<boolean> => {
+      if (!audioRef.current) return false;
 
-    if (loadedSurahNum === surahNum && loadedQariId === qariId && audioRef.current.readyState >= 2) {
-      return true;
-    }
-
-    setAudioLoading(true);
-
-    return new Promise<boolean>((resolve) => {
-      const audio = audioRef.current;
-      if (!audio) {
-        setAudioLoading(false);
-        resolve(false);
-        return;
+      if (loadedSurahNum === surahNum && loadedQariId === qariId && audioRef.current.readyState >= 2) {
+        return true;
       }
 
-      const onCanPlay = () => {
-        audio.removeEventListener('canplaythrough', onCanPlay);
-        audio.removeEventListener('error', onError);
-        setLoadedSurahNum(surahNum);
-        setLoadedQariId(qariId);
-        setAudioLoading(false);
-        resolve(true);
-      };
+      setAudioLoading(true);
 
-      const onError = () => {
-        audio.removeEventListener('canplaythrough', onCanPlay);
-        audio.removeEventListener('error', onError);
-        toast.error('هەڵەیەک ڕوویدا لە بارکردنی دەنگ');
-        setAudioLoading(false);
-        resolve(false);
-      };
+      return new Promise<boolean>((resolve) => {
+        const audio = audioRef.current;
+        if (!audio) {
+          setAudioLoading(false);
+          resolve(false);
+          return;
+        }
 
-      audio.addEventListener('canplaythrough', onCanPlay);
-      audio.addEventListener('error', onError);
-      audio.src = getAudioUrl(surahNum);
-      audio.load();
-    });
-  };
+        const onCanPlay = () => {
+          audio.removeEventListener("canplaythrough", onCanPlay);
+          audio.removeEventListener("error", onError);
+          setLoadedSurahNum(surahNum);
+          setLoadedQariId(qariId);
+          setAudioLoading(false);
+          resolve(true);
+        };
+
+        const onError = () => {
+          audio.removeEventListener("canplaythrough", onCanPlay);
+          audio.removeEventListener("error", onError);
+          toast.error("هەڵەیەک ڕوویدا لە بارکردنی دەنگ");
+          setAudioLoading(false);
+          resolve(false);
+        };
+
+        audio.addEventListener("canplaythrough", onCanPlay);
+        audio.addEventListener("error", onError);
+        audio.src = selectedQari.getUrl(surahNum);
+        audio.load();
+      });
+    },
+    [loadedSurahNum, loadedQariId, selectedQari]
+  );
 
   // Audio controls
-  const togglePlay = async () => {
+  const togglePlay = useCallback(async () => {
     if (!audioRef.current || !selectedSurah) return;
 
     if (isPlaying) {
@@ -137,39 +142,40 @@ export default function QuranPage() {
         await audioRef.current.play();
         setIsPlaying(true);
       } catch {
-        toast.error('نەتوانرا دەنگ لێبدرێت');
+        toast.error("نەتوانرا دەنگ لێبدرێت");
       }
     }
-  };
+  }, [isPlaying, selectedSurah, loadedSurahNum, loadedQariId, selectedQari, loadAudio]);
 
-  const toggleMute = () => {
+  const toggleMute = useCallback(() => {
     if (!audioRef.current) return;
     audioRef.current.muted = !isMuted;
     setIsMuted(!isMuted);
-  };
+  }, [isMuted]);
 
-  const seekAudio = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const seekAudio = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     if (!audioRef.current) return;
     const time = parseFloat(e.target.value);
     audioRef.current.currentTime = time;
     setAudioCurrentTime(time);
-  };
+  }, []);
 
-  const skipBack = () => {
+  const skipBack = useCallback(() => {
     if (audioRef.current) {
       audioRef.current.currentTime = 0;
       setAudioCurrentTime(0);
     }
-  };
+  }, []);
 
-  const formatTime = (seconds: number) => {
+  const formatTime = useCallback((seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
-  };
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
+  }, []);
 
-  // Reset audio state when surah changes
+  // Batch audio state reset when surah changes — single state transition
   useEffect(() => {
+    if (selectedSurah === null) return;
     setIsPlaying(false);
     setAudioCurrentTime(0);
     setAudioDuration(0);
@@ -177,19 +183,26 @@ export default function QuranPage() {
     setLoadedQariId(null);
   }, [selectedSurah]);
 
-  // Reset audio when qari changes
-  useEffect(() => {
-    setAudioCurrentTime(0);
-    setAudioDuration(0);
-    setLoadedQariId(null);
-    setLoadedSurahNum(null);
-    if (audioRef.current) {
-      audioRef.current.pause();
+  // Handle Qari change — batch reset without causing cascading renders
+  const handleQariChange = useCallback(
+    (qari: Qari) => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.removeAttribute("src");
+        audioRef.current.load();
+      }
+      // Batch all state updates
+      setSelectedQari(qari);
       setIsPlaying(false);
-    }
-  }, [selectedQari]);
+      setAudioCurrentTime(0);
+      setAudioDuration(0);
+      setLoadedQariId(null);
+      setLoadedSurahNum(null);
+    },
+    []
+  );
 
-  // Audio event handlers
+  // Audio event handlers — stable reference
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
@@ -214,22 +227,22 @@ export default function QuranPage() {
     const handlePlay = () => setIsPlaying(true);
     const handlePause = () => setIsPlaying(false);
 
-    audio.addEventListener('timeupdate', handleTimeUpdate);
-    audio.addEventListener('loadedmetadata', handleDurationChange);
-    audio.addEventListener('durationchange', handleDurationChange);
-    audio.addEventListener('ended', handleEnded);
-    audio.addEventListener('play', handlePlay);
-    audio.addEventListener('pause', handlePause);
+    audio.addEventListener("timeupdate", handleTimeUpdate);
+    audio.addEventListener("loadedmetadata", handleDurationChange);
+    audio.addEventListener("durationchange", handleDurationChange);
+    audio.addEventListener("ended", handleEnded);
+    audio.addEventListener("play", handlePlay);
+    audio.addEventListener("pause", handlePause);
 
     return () => {
-      audio.removeEventListener('timeupdate', handleTimeUpdate);
-      audio.removeEventListener('loadedmetadata', handleDurationChange);
-      audio.removeEventListener('durationchange', handleDurationChange);
-      audio.removeEventListener('ended', handleEnded);
-      audio.removeEventListener('play', handlePlay);
-      audio.removeEventListener('pause', handlePause);
+      audio.removeEventListener("timeupdate", handleTimeUpdate);
+      audio.removeEventListener("loadedmetadata", handleDurationChange);
+      audio.removeEventListener("durationchange", handleDurationChange);
+      audio.removeEventListener("ended", handleEnded);
+      audio.removeEventListener("play", handlePlay);
+      audio.removeEventListener("pause", handlePause);
     };
-  }, [loadedSurahNum]);
+  }, []); // Empty deps — audio ref is stable
 
   // Keyboard navigation
   useEffect(() => {
@@ -237,9 +250,9 @@ export default function QuranPage() {
       if (showSurahList || loading) return;
 
       if (e.key === "ArrowLeft" && currentAyahIndex < ayahs.length - 1) {
-        setCurrentAyahIndex(prev => prev + 1);
+        setCurrentAyahIndex((prev) => prev + 1);
       } else if (e.key === "ArrowRight" && currentAyahIndex > 0) {
-        setCurrentAyahIndex(prev => prev - 1);
+        setCurrentAyahIndex((prev) => prev - 1);
       } else if (e.key === "Escape") {
         setShowSurahList(true);
       }
@@ -249,137 +262,98 @@ export default function QuranPage() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [showSurahList, loading, currentAyahIndex, ayahs.length]);
 
-  // Load tafsir JSON
-  const loadTafsirJSON = async (tafsirId: string) => {
-    try {
-      setTafsirLoaded(false);
-      const response = await fetch(`/data/tafsir_${tafsirId}.json`);
+  const handleSelectSurah = useCallback(
+    async (surah: Surah) => {
+      setSelectedSurah(surah);
+      setShowSurahList(false);
+      setLoading(true);
+      setCurrentAyahIndex(0);
 
-      if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
+      // Prioritize parsing this surah's tafsir if full parse isn't done yet
+      loadForSurah(surah.number);
 
-      const rawData = await response.json();
-      const parsedData: TafsirData = {};
+      try {
+        const arabicRes = await fetch(
+          `https://api.quran.com/api/v4/quran/verses/uthmani?chapter_number=${surah.number}`
+        );
+        const arabicData = await arabicRes.json();
 
-      rawData.forEach((item: { s: string | number; a: number; t: string }) => {
-        const surahNum = typeof item.s === 'string' ? parseInt(item.s, 10) : item.s;
-        if (!parsedData[surahNum]) parsedData[surahNum] = {};
-        parsedData[surahNum][item.a] = item.t;
-      });
-
-      setTafsirData(parsedData);
-      setTafsirLoaded(true);
-      toast.success("تەفسیر بارکرا", {
-        description: TAFSIR_OPTIONS.find(t => t.id === tafsirId)?.name,
-        duration: 1000
-      });
-
-      localStorage.setItem("selected-tafsir-id", tafsirId);
-    } catch (err) {
-      console.error("Failed to load tafsir:", err);
-      toast.error("هەڵە لە بارکردنی تەفسیر");
-    }
-  };
-
-  // Initial load
-  useEffect(() => {
-    const saved = localStorage.getItem("selected-tafsir-id");
-    const validIds = TAFSIR_OPTIONS.map(t => t.id);
-    const validSaved = saved && validIds.includes(saved) ? saved : "rebar";
-
-    if (validSaved !== saved) {
-      localStorage.removeItem("selected-tafsir-id");
-    }
-
-    setSelectedTafsir(validSaved);
-    loadTafsirJSON(validSaved);
-    fetchSurahs();
-  }, []);
-
-  // Watch for tafsir change
-  const isInitialMount = useRef(true);
-  useEffect(() => {
-    if (isInitialMount.current) {
-      isInitialMount.current = false;
-      return;
-    }
-    loadTafsirJSON(selectedTafsir);
-  }, [selectedTafsir]);
-
-  const fetchSurahs = async () => {
-    try {
-      const response = await fetch("https://api.alquran.cloud/v1/surah");
-      const data = await response.json();
-      if (data.code === 200) {
-        setSurahs(data.data);
+        if (arabicData?.verses?.length > 0) {
+          const combined = arabicData.verses.map(
+            (verse: { id: number; verse_key: string; text_uthmani: string }) => {
+              const ayahNum = parseInt(verse.verse_key.split(":")[1]);
+              return {
+                number: verse.id,
+                numberInSurah: ayahNum,
+                text: verse.text_uthmani,
+                translation:
+                  tafsirData[surah.number]?.[ayahNum] ||
+                  "تەفسیر بەردەست نییە بۆ ئەم ئایەتە",
+              };
+            }
+          );
+          setAyahs(combined);
+        } else {
+          throw new Error("No verses found");
+        }
+      } catch {
+        // Fallback construction
+        const surahTafsir = tafsirData[surah.number] || {};
+        const count = surah.numberOfAyahs;
+        const fallback = Array.from({ length: count }, (_, i) => ({
+          number: i + 1,
+          numberInSurah: i + 1,
+          text: `﴿ ${i + 1} ﴾`,
+          translation: surahTafsir[i + 1] || "",
+        }));
+        setAyahs(fallback);
+      } finally {
+        setLoading(false);
       }
-    } catch {
-      // Fallback to static data
-    }
-  };
-
-  const handleSelectSurah = async (surah: Surah) => {
-    setSelectedSurah(surah);
-    setShowSurahList(false);
-    setLoading(true);
-    setCurrentAyahIndex(0);
-
-    try {
-      const arabicRes = await fetch(
-        `https://api.quran.com/api/v4/quran/verses/uthmani?chapter_number=${surah.number}`
-      );
-      const arabicData = await arabicRes.json();
-
-      if (arabicData?.verses?.length > 0) {
-        const combined = arabicData.verses.map((verse: { id: number; verse_key: string; text_uthmani: string }) => {
-          const ayahNum = parseInt(verse.verse_key.split(':')[1]);
-          return {
-            number: verse.id,
-            numberInSurah: ayahNum,
-            text: verse.text_uthmani,
-            translation: tafsirData[surah.number]?.[ayahNum] || "تەفسیر بەردەست نییە بۆ ئەم ئایەتە",
-          };
-        });
-        setAyahs(combined);
-      } else {
-        throw new Error("No verses found");
-      }
-    } catch {
-      // Fallback construction
-      const surahTafsir = tafsirData[surah.number] || {};
-      const count = surah.numberOfAyahs;
-      const fallback = Array.from({ length: count }, (_, i) => ({
-        number: i + 1,
-        numberInSurah: i + 1,
-        text: `﴿ ${i + 1} ﴾`,
-        translation: surahTafsir[i + 1] || ""
-      }));
-      setAyahs(fallback);
-    } finally {
-      setLoading(false);
-    }
-  };
+    },
+    [tafsirData, loadForSurah]
+  );
 
   const currentAyah = ayahs[currentAyahIndex];
 
-  const copyAyah = (ayah: AyahWithTranslation) => {
-    const tafsirText = selectedSurah ? (tafsirData[selectedSurah.number]?.[ayah.numberInSurah] || "") : "";
-    const text = `${ayah.text}\n\n${tafsirText}\n\n— ${selectedSurah?.name} (${ayah.numberInSurah})`;
-    navigator.clipboard.writeText(text);
-    toast.success("کۆپی کرا!");
-  };
+  const copyAyah = useCallback(
+    (ayah: AyahWithTranslation) => {
+      const tafsirText = selectedSurah
+        ? tafsirData[selectedSurah.number]?.[ayah.numberInSurah] || ""
+        : "";
+      const text = `${ayah.text}\n\n${tafsirText}\n\n— ${selectedSurah?.name} (${ayah.numberInSurah})`;
+      navigator.clipboard.writeText(text);
+      toast.success("کۆپی کرا!");
+    },
+    [selectedSurah, tafsirData]
+  );
 
-  const shareAyah = (ayah: AyahWithTranslation) => {
-    const tafsirText = selectedSurah ? (tafsirData[selectedSurah.number]?.[ayah.numberInSurah] || "") : "";
-    const text = `${ayah.text}\n\n${tafsirText}\n\n— ${selectedSurah?.name} (${ayah.numberInSurah})`;
-    if (navigator.share) {
-      navigator.share({
-        title: `Quran: ${selectedSurah?.name}`,
-        text: text
-      });
-    } else {
-      copyAyah(ayah);
-    }
-  };
+  const shareAyah = useCallback(
+    (ayah: AyahWithTranslation) => {
+      const tafsirText = selectedSurah
+        ? tafsirData[selectedSurah.number]?.[ayah.numberInSurah] || ""
+        : "";
+      const text = `${ayah.text}\n\n${tafsirText}\n\n— ${selectedSurah?.name} (${ayah.numberInSurah})`;
+      if (navigator.share) {
+        navigator.share({
+          title: `Quran: ${selectedSurah?.name}`,
+          text: text,
+        });
+      } else {
+        copyAyah(ayah);
+      }
+    },
+    [selectedSurah, tafsirData, copyAyah]
+  );
+
+  const handlePrevAyah = useCallback(
+    () => setCurrentAyahIndex((p) => Math.max(0, p - 1)),
+    []
+  );
+  const handleNextAyah = useCallback(
+    () => setCurrentAyahIndex((p) => Math.min(ayahs.length - 1, p + 1)),
+    [ayahs.length]
+  );
 
   return (
     <div className="relative min-h-screen overflow-hidden">
@@ -423,7 +397,7 @@ export default function QuranPage() {
                       selectedTafsir={selectedTafsir}
                       setSelectedTafsir={setSelectedTafsir}
                       selectedQari={selectedQari}
-                      setSelectedQari={setSelectedQari}
+                      setSelectedQari={handleQariChange}
                       showTafsir={showTafsir}
                       setShowTafsir={setShowTafsir}
                     />
@@ -497,8 +471,8 @@ export default function QuranPage() {
                       showAyahNav={viewMode === "card"}
                       currentAyahIndex={currentAyahIndex}
                       totalAyahs={ayahs.length}
-                      onPrevAyah={() => setCurrentAyahIndex(p => Math.max(0, p - 1))}
-                      onNextAyah={() => setCurrentAyahIndex(p => Math.min(ayahs.length - 1, p + 1))}
+                      onPrevAyah={handlePrevAyah}
+                      onNextAyah={handleNextAyah}
                     />
                   )}
                 </>

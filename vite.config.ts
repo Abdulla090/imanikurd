@@ -15,4 +15,23 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  build: {
+    // Increase chunk size warning limit
+    chunkSizeWarningLimit: 600,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // Split heavy vendor libs into their own chunks for better caching
+          "vendor-react": ["react", "react-dom"],
+          "vendor-framer": ["framer-motion"],
+          "vendor-ui": [
+            "@radix-ui/react-dialog",
+            "@radix-ui/react-select",
+            "@radix-ui/react-toggle-group",
+            "@radix-ui/react-switch",
+          ],
+        },
+      },
+    },
+  },
 }));

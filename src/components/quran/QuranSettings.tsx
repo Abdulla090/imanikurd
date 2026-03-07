@@ -1,5 +1,6 @@
 
-import { Settings, BookOpen, Layers, Type, Volume2 } from "lucide-react";
+import { memo } from "react";
+import { BookOpen, Layers, Volume2 } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -18,7 +19,7 @@ interface QuranSettingsProps {
     setShowTafsir: (show: boolean) => void;
 }
 
-export function QuranSettings({
+export const QuranSettings = memo(function QuranSettings({
     viewMode,
     setViewMode,
     selectedTafsir,
@@ -109,4 +110,4 @@ export function QuranSettings({
             </div>
         </div>
     );
-}
+});

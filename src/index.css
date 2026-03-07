@@ -372,3 +372,9 @@ h4.chat-heading {
   margin: 6px 0;
   padding-right: 8px;
 }
+
+/* Spin keyframe for CSS-based rotating animations (GeometricPattern) */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
