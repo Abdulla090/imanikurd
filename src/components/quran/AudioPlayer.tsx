@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { Loader2, Play, Pause, Volume2, VolumeX, SkipBack, Download, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Qari, Surah } from "./types";
@@ -26,7 +27,7 @@ interface AudioPlayerProps {
     onNextAyah?: () => void;
 }
 
-export function AudioPlayer({
+export const AudioPlayer = memo(function AudioPlayer({
     audioRef,
     selectedSurah,
     selectedQari,
@@ -147,4 +148,4 @@ export function AudioPlayer({
             </div>
         </div>
     );
-}
+});

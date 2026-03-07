@@ -367,7 +367,7 @@ export default function Index() {
                 <div className="absolute inset-0 bg-white/5 opacity-0 group-active:opacity-100 transition-opacity" />
               </Link>
 
-              {/* Islamic Library Card */}
+              {/* Islamic Library Card - Temporarily Disabled 
               <Link
                 to="/library"
                 className="col-span-2 relative overflow-hidden rounded-3xl h-32 group"
@@ -388,6 +388,7 @@ export default function Index() {
 
                 <div className="absolute inset-0 bg-white/5 opacity-0 group-active:opacity-100 transition-opacity" />
               </Link>
+              */}
 
               {/* Islamic Media Card */}
               <Link
@@ -588,6 +589,7 @@ export default function Index() {
                   <Link to="/seerah" className="absolute inset-0" aria-label="Seerah" />
                 </motion.div>
 
+                {/* Temporarily Disabled
                 <motion.div whileHover={{ y: -5 }} className="relative p-6 rounded-3xl glass-card border-none bg-gradient-to-br from-fuchsia-500/10 to-purple-500/10 flex flex-col items-center text-center">
                   <div className="w-12 h-12 rounded-full bg-fuchsia-100 dark:bg-fuchsia-900/20 text-fuchsia-600 flex items-center justify-center mb-3">
                     <Library className="w-6 h-6" />
@@ -596,6 +598,7 @@ export default function Index() {
                   <p className="text-xs text-muted-foreground">کتێبی ئیسلامی کوردی</p>
                   <Link to="/library" className="absolute inset-0" aria-label="Library" />
                 </motion.div>
+                */}
               </div>
             </motion.div>
           </motion.div>

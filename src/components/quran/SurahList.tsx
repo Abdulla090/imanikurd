@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { motion } from "framer-motion";
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -15,7 +16,7 @@ interface SurahListProps {
     onSelectSurah: (surah: Surah) => void;
 }
 
-export function SurahList({
+export const SurahList = memo(function SurahList({
     surahs,
     searchQuery,
     setSearchQuery,
@@ -74,12 +75,9 @@ export function SurahList({
 
             {/* Surah List */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3 max-h-[75vh] overflow-y-auto scrollbar-thin p-1">
-                {filteredSurahs.map((surah, index) => (
-                    <motion.button
+                {filteredSurahs.map((surah) => (
+                    <button
                         key={surah.number}
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: index * 0.005 }}
                         onClick={() => onSelectSurah(surah)}
                         className="feature-card flex items-center gap-3 p-3 sm:p-4 text-right hover:border-primary/50 transition-all"
                     >
@@ -96,9 +94,9 @@ export function SurahList({
                                 </span>
                             </div>
                         </div>
-                    </motion.button>
+                    </button>
                 ))}
             </div>
         </motion.div>
     );
-}
+});

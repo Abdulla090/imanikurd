@@ -34,6 +34,7 @@ const categoryGradients: Record<string, string> = {
 export default function MediaPage() {
     const [activeCategory, setActiveCategory] = useState<string>("all");
     const [playingVideo, setPlayingVideo] = useState<MediaItem | null>(null);
+    const [isVideoRendered, setIsVideoRendered] = useState(false);
     const [searchTerm, setSearchTerm] = useState("");
     const [language, setLanguage] = useState<"ku" | "en">("ku");
 
@@ -50,11 +51,15 @@ export default function MediaPage() {
 
     const handlePlay = useCallback((item: MediaItem) => {
         setPlayingVideo(item);
+        setIsVideoRendered(false);
         document.body.style.overflow = "hidden";
+        // Delay iframe rendering to allow the modal animation to run smoothly without lag
+        setTimeout(() => setIsVideoRendered(true), 350);
     }, []);
 
     const handleClose = useCallback(() => {
         setPlayingVideo(null);
+        setIsVideoRendered(false);
         document.body.style.overflow = "";
     }, []);
 
@@ -369,14 +374,21 @@ export default function MediaPage() {
                             </div>
 
                             {/* Iframe */}
-                            <div className="flex-1 rounded-2xl overflow-hidden bg-black shadow-2xl">
-                                <iframe
-                                    src={getEmbedUrl(playingVideo.id)}
-                                    className="w-full h-full"
-                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                    allowFullScreen
-                                    title={playingVideo.title}
-                                />
+                            <div className="flex-1 rounded-2xl overflow-hidden bg-black shadow-2xl relative">
+                                {!isVideoRendered && (
+                                    <div className="absolute inset-0 flex items-center justify-center bg-black z-10">
+                                        <div className="w-10 h-10 border-4 border-primary/30 border-t-primary rounded-full animate-spin"></div>
+                                    </div>
+                                )}
+                                {isVideoRendered && (
+                                    <iframe
+                                        src={getEmbedUrl(playingVideo.id)}
+                                        className="w-full h-full"
+                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                        allowFullScreen
+                                        title={playingVideo.title}
+                                    />
+                                )}
                             </div>
                         </motion.div>
                     </>

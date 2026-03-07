@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Copy, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -16,7 +17,7 @@ interface QuranCardViewProps {
     onShareAyah: () => void;
 }
 
-export function QuranCardView({
+export const QuranCardView = memo(function QuranCardView({
     currentAyah,
     currentAyahIndex,
     totalAyahs,
@@ -75,4 +76,4 @@ export function QuranCardView({
             </motion.div>
         </AnimatePresence>
     );
-}
+});

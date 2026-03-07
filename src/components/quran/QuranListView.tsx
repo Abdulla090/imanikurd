@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { AyahWithTranslation, Surah, TafsirData } from "./types";
 
 interface QuranListViewProps {
@@ -7,7 +8,7 @@ interface QuranListViewProps {
     showTafsir: boolean;
 }
 
-export function QuranListView({
+export const QuranListView = memo(function QuranListView({
     ayahs,
     selectedSurah,
     tafsirData,
@@ -30,4 +31,4 @@ export function QuranListView({
             ))}
         </div>
     );
-}
+});

@@ -49,6 +49,7 @@ const allFeatures = [
         link: "/companions",
         color: "bg-cyan-500/10 text-cyan-600",
     },
+    /* Temporarily Disabled
     {
         icon: Library,
         title: "کتێبخانەی ئیسلامی",
@@ -57,6 +58,7 @@ const allFeatures = [
         link: "/library",
         color: "bg-purple-500/10 text-purple-600",
     },
+    */
     {
         icon: Tv,
         title: "میدیای ئیسلامی",

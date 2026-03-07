@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, memo } from "react";
 import { ChevronLeft, ChevronRight, Play, Pause, Eye, EyeOff, Maximize, Minimize, X, BookCopy, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -17,7 +17,7 @@ interface QuranBookViewProps {
     onExitBookView: () => void;
 }
 
-export function QuranBookView({
+export const QuranBookView = memo(function QuranBookView({
     selectedSurah,
     paginatedPages,
     tafsirData,
@@ -399,4 +399,4 @@ export function QuranBookView({
             </div>
         </div>
     );
-}
+});
