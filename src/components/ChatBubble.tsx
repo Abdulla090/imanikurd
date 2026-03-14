@@ -183,7 +183,7 @@ const processSSEStream = async (
   return fullText || 'Sorry, I could not generate a response.';
 };
 
-export function ChatBubble() {
+export function ChatBubble({ hideButton = false }: { hideButton?: boolean }) {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -299,7 +299,7 @@ export function ChatBubble() {
     <>
       {/* Floating Bubble Button */}
       <AnimatePresence>
-        {!isOpen && (
+        {!isOpen && !hideButton && (
           <motion.button
             initial={{ scale: 0, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}

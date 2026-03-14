@@ -1,4 +1,5 @@
-import { memo, useRef, useState, useEffect, useCallback } from "react";
+import { memo, useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
 import { AyahWithTranslation, Surah, TafsirData } from "./types";
 
 interface QuranListViewProps {
@@ -42,35 +43,17 @@ export const QuranListView = memo(function QuranListView({
     tafsirData,
     showTafsir,
 }: QuranListViewProps) {
-    const BATCH_SIZE = 20; // Initial ayahs to render
-    const LOAD_MORE = 15; // How many more to load each time
-    const [visibleCount, setVisibleCount] = useState(BATCH_SIZE);
-    const sentinelRef = useRef<HTMLDivElement>(null);
+    const INITIAL_VISIBLE = 10;
+    const LOAD_MORE_STEP = 10;
+    const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE);
 
     // Reset visible count when ayahs change (new surah selected)
     useEffect(() => {
-        setVisibleCount(BATCH_SIZE);
+        setVisibleCount(INITIAL_VISIBLE);
     }, [ayahs]);
 
-    // Intersection Observer for infinite scroll
-    useEffect(() => {
-        const sentinel = sentinelRef.current;
-        if (!sentinel) return;
-
-        const observer = new IntersectionObserver(
-            (entries) => {
-                if (entries[0].isIntersecting && visibleCount < ayahs.length) {
-                    setVisibleCount((prev) => Math.min(prev + LOAD_MORE, ayahs.length));
-                }
-            },
-            { rootMargin: "200px" }
-        );
-
-        observer.observe(sentinel);
-        return () => observer.disconnect();
-    }, [visibleCount, ayahs.length]);
-
     const visibleAyahs = ayahs.slice(0, visibleCount);
+    const remainingAyahs = Math.max(ayahs.length - visibleCount, 0);
 
     return (
         <div className="space-y-6 pb-48">
@@ -83,10 +66,21 @@ export const QuranListView = memo(function QuranListView({
                     showTafsir={showTafsir}
                 />
             ))}
-            {/* Sentinel for loading more */}
-            {visibleCount < ayahs.length && (
-                <div ref={sentinelRef} className="flex justify-center py-4">
-                    <div className="w-6 h-6 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+            {remainingAyahs > 0 && (
+                <div className="flex flex-col items-center gap-3 py-2">
+                    <Button
+                        variant="outline"
+                        onClick={() =>
+                            setVisibleCount((prev) =>
+                                Math.min(prev + LOAD_MORE_STEP, ayahs.length)
+                            )
+                        }
+                    >
+                        زیاتر پیشان بدە ({Math.min(LOAD_MORE_STEP, remainingAyahs)} ئایەت)
+                    </Button>
+                    <p className="text-xs text-muted-foreground">
+                        {remainingAyahs} ئایەت ماوە
+                    </p>
                 </div>
             )}
         </div>

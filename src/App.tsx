@@ -57,9 +57,12 @@ const SuspenseLoader = memo(() => (
 ));
 SuspenseLoader.displayName = 'SuspenseLoader';
 
-// ChatBubble wrapper - shows on all pages
+// ChatBubble wrapper - shows only on home and explore
 const GlobalChatBubble = memo(() => {
-  return <ChatBubble />;
+  const location = useLocation();
+  const showButton = location.pathname === '/' || location.pathname === '/start' || location.pathname === '/explore';
+  
+  return <ChatBubble hideButton={!showButton} />;
 });
 GlobalChatBubble.displayName = 'GlobalChatBubble';
 

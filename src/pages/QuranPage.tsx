@@ -31,7 +31,8 @@ export default function QuranPage() {
   const [showSurahList, setShowSurahList] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [showTafsir, setShowTafsir] = useState(true);
-  const [viewMode, setViewMode] = useState<"card" | "list" | "book">("list");
+  const [viewMode, setViewMode] = useState<"card" | "list" | "book">("card");
+  const [lastReadingMode, setLastReadingMode] = useState<"card" | "list">("card");
 
   // Use cached tafsir hook — prioritizes parsing the current surah first
   const { tafsirData, tafsirLoaded, selectedTafsir, setSelectedTafsir, loadForSurah } = useTafsirCache(selectedSurah?.number);
@@ -355,8 +356,14 @@ export default function QuranPage() {
     [ayahs.length]
   );
 
+  useEffect(() => {
+    if (viewMode !== "book") {
+      setLastReadingMode(viewMode);
+    }
+  }, [viewMode]);
+
   return (
-    <div className="relative min-h-screen overflow-hidden">
+    <div className="relative min-h-screen overflow-x-hidden">
       <GeometricPattern />
       <Navigation />
 
@@ -375,7 +382,7 @@ export default function QuranPage() {
           ) : (
             <div>
               {/* Reading View Controls */}
-              <div className="flex items-center justify-between mb-4 gap-4 sticky top-20 z-20 bg-background/80 backdrop-blur pb-2">
+              <div className="flex items-center justify-between mb-4 gap-4 sticky top-24 sm:top-28 z-40 bg-background/95 backdrop-blur pb-2 px-1 pt-2 -mx-1 rounded-b-xl border-b border-border/50 shadow-sm">
                 <Button variant="ghost" onClick={() => setShowSurahList(true)} className="gap-2">
                   <BookOpen className="w-4 h-4" />
                   لیست
@@ -447,7 +454,7 @@ export default function QuranPage() {
                       audioCurrentTime={audioCurrentTime}
                       onTogglePlay={togglePlay}
                       formatTime={formatTime}
-                      onExitBookView={() => setViewMode("list")}
+                      onExitBookView={() => setViewMode(lastReadingMode)}
                     />
                   )}
 

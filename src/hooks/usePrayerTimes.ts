@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 // Import the comprehensive JSON data from Noor Database
 // @ts-ignore
 import prayerDataDB from '../data/prayer_times_db.json';
@@ -97,11 +97,11 @@ export function usePrayerTimes() {
     }).formatToParts(date);
   };
 
-  const fetchMobilePrayerTimes = async (lat: number, lng: number) => {
+  const fetchMobilePrayerTimes = async (lat: number, lng: number, forceCity?: string) => {
     setLoading(true);
     try {
       // Use selected city if available, otherwise detect
-      const cityKey = selectedCity || getCityName(lat, lng);
+      const cityKey = forceCity || selectedCity || getCityName(lat, lng);
       console.log(`Looking up prayer times for city: ${cityKey}`);
 
       const today = new Date();
@@ -188,30 +188,36 @@ export function usePrayerTimes() {
       initialized.current = true;
       // Default Location (Hawler)
       // Check localStorage
-      const saved = localStorage.getItem('user-location');
-      if (saved) {
-        const { lat, lng } = JSON.parse(saved);
+      const savedCity = localStorage.getItem('user-selected-city');
+      const savedLoc = localStorage.getItem('user-location');
+
+      if (savedCity) {
+        setSelectedCity(savedCity);
+      }
+
+      if (savedLoc) {
+        const { lat, lng } = JSON.parse(savedLoc);
         setLocation({ lat, lng });
-        fetchMobilePrayerTimes(lat, lng);
+        fetchMobilePrayerTimes(lat, lng, savedCity || undefined);
       } else if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
           (pos) => {
             const { latitude, longitude } = pos.coords;
             setLocation({ lat: latitude, lng: longitude });
             localStorage.setItem('user-location', JSON.stringify({ lat: latitude, lng: longitude }));
-            fetchMobilePrayerTimes(latitude, longitude);
+            fetchMobilePrayerTimes(latitude, longitude, savedCity || undefined);
           },
           () => {
             // Default to Hawler
             const defLat = 36.19, defLng = 44.01;
             setLocation({ lat: defLat, lng: defLng });
-            fetchMobilePrayerTimes(defLat, defLng);
+            fetchMobilePrayerTimes(defLat, defLng, savedCity || undefined);
           }
         );
       } else {
         const defLat = 36.19, defLng = 44.01;
         setLocation({ lat: defLat, lng: defLng });
-        fetchMobilePrayerTimes(defLat, defLng);
+        fetchMobilePrayerTimes(defLat, defLng, savedCity || undefined);
       }
     }
   }, []);
@@ -230,7 +236,7 @@ export function usePrayerTimes() {
   };
 
   // Helper functions used by UI
-  const getNextPrayer = (): { name: string; time: string } | null => {
+  const getNextPrayer = useCallback((): { name: string; time: string } | null => {
     if (!prayerTimes?.timings) return null;
 
     const prayers = [
@@ -255,9 +261,9 @@ export function usePrayerTimes() {
 
     // All prayers have passed today, return Fajr (next day)
     return prayers[0];
-  };
+  }, [prayerTimes]);
 
-  const getTimeUntilNextPrayer = (): { hours: number; minutes: number } => {
+  const getTimeUntilNextPrayer = useCallback((): { hours: number; minutes: number } => {
     const next = getNextPrayer();
     if (!next) return { hours: 0, minutes: 0 };
 
@@ -275,10 +281,10 @@ export function usePrayerTimes() {
       hours: Math.floor(diff / 60),
       minutes: diff % 60
     };
-  };
+  }, [getNextPrayer]);
 
   // Get all prayer times for a specific month
-  const getMonthlyPrayerTimes = (month?: number, year?: number) => {
+  const getMonthlyPrayerTimes = useCallback((month?: number, year?: number) => {
     const targetMonth = month ?? new Date().getMonth() + 1;
     const targetYear = year ?? new Date().getFullYear();
     const cityKey = selectedCity || (location ? getCityName(location.lat, location.lng) : "Hawler");
@@ -308,7 +314,7 @@ export function usePrayerTimes() {
     });
 
     return monthRecords.sort((a, b) => a.day - b.day);
-  };
+  }, [selectedCity, location]);
 
   // Public API
   return {
@@ -320,7 +326,7 @@ export function usePrayerTimes() {
     getTimeUntilNextPrayer,
     getMonthlyPrayerTimes,
     getCityName: (lat: number, lng: number) => {
-      const key = getCityName(lat, lng);
+      const key = selectedCity || getCityName(lat, lng);
       // Map key to Kurdish display name
       const map: Record<string, string> = {
         'Hawler': 'هەولێر',
@@ -333,7 +339,18 @@ export function usePrayerTimes() {
         'Soran': 'سۆران',
         'Akre': 'ئاکرێ',
         'Qaladze': 'قەڵادزێ',
-        'Darbandikhan': 'دەربەندیخان'
+        'Darbandikhan': 'دەربەندیخان',
+        'Choman': 'چۆمان',
+        'Penjwin': 'پێنجوێن',
+        'Shaqlawa': 'شەقڵاوە',
+        'Rawanduz': 'ڕەواندز',
+        'Ranya': 'ڕانیە',
+        'Kifri': 'کفری',
+        'Chamchamal': 'چەمچەماڵ',
+        'Kalar': 'کەلار',
+        'Baghdad': 'بەغدا',
+        'Mosul': 'موسڵ',
+        'Basra': 'بەسرە'
       };
       return map[key] || key;
     },
@@ -341,9 +358,13 @@ export function usePrayerTimes() {
       if (location) fetchMobilePrayerTimes(location.lat, location.lng);
     },
     // New features
+    selectedCity,
     setSelectedCity: (city: string) => {
       setSelectedCity(city);
-      if (location) fetchMobilePrayerTimes(location.lat, location.lng);
+      localStorage.setItem('user-selected-city', city);
+      const lat = location?.lat ?? 36.19;
+      const lng = location?.lng ?? 44.01;
+      fetchMobilePrayerTimes(lat, lng, city);
     },
     availableCities: Object.keys(prayerDataDB).sort()
   };

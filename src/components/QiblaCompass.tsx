@@ -27,7 +27,7 @@ const QiblaCompass = () => {
             Math.cos(phi) * Math.tan(phiK) - Math.sin(phi) * Math.cos(lambdaK - lambda)
         );
 
-        return Math.round(psi);
+        return Math.round((psi + 360) % 360);
     };
 
     const handlePermission = async () => {
@@ -44,7 +44,7 @@ const QiblaCompass = () => {
                 const permission = await (DeviceOrientationEvent as any).requestPermission();
                 if (permission === 'granted') {
                     setPermissionGranted(true);
-                    window.addEventListener('deviceorientation', handleOrientation);
+                    window.addEventListener('deviceorientation', handleOrientation, true);
                 } else {
                     setError("Permission to access device orientation was denied.");
                 }
@@ -54,7 +54,12 @@ const QiblaCompass = () => {
         } else {
             // Non-iOS 13+ devices (Android, older iOS)
             setPermissionGranted(true);
-            window.addEventListener('deviceorientation', handleOrientation);
+            const win = window as Window & { ondeviceorientationabsolute?: any };
+            if (win.ondeviceorientationabsolute !== undefined) {
+                win.addEventListener('deviceorientationabsolute' as any, handleOrientation);
+            } else {
+                win.addEventListener('deviceorientation', handleOrientation);
+            }
         }
 
         getLocation();
@@ -107,15 +112,28 @@ const QiblaCompass = () => {
     };
 
     const handleOrientation = (event: DeviceOrientationEvent) => {
-        // webkitCompassHeading is for iOS
-        const compass = (event as any).webkitCompassHeading || Math.abs(event.alpha! - 360);
-        setHeading(compass);
+        let newHeading = 0;
+
+        // iOS Safari uses webkitCompassHeading (0 = North, increases clockwise)
+        if ('webkitCompassHeading' in event && typeof (event as any).webkitCompassHeading === 'number') {
+            newHeading = (event as any).webkitCompassHeading;
+        }
+        // Android Chrome uses alpha (0 = arbitrary direction at start, or North with absolute: true)
+        else if (event.alpha !== null) {
+            // If absolute is true, alpha represents the compass heading from magnetic north
+            // alpha = 0 means device points North, increases counter-clockwise
+            // We need clockwise heading, so: heading = (360 - alpha) % 360
+            newHeading = (360 - event.alpha) % 360;
+        }
+
+        setHeading(newHeading);
     };
 
     useEffect(() => {
         // Cleanup
         return () => {
             window.removeEventListener('deviceorientation', handleOrientation);
+            (window as any).removeEventListener('deviceorientationabsolute', handleOrientation);
         };
     }, []);
 

@@ -40,8 +40,11 @@ function parseFullTafsirChunked(
     const parsedData: TafsirData = {};
     const chunkSize = 3000; // entries per frame
     let index = 0;
+    let cancelled = false;
 
     function processChunk() {
+        if (cancelled) return;
+
         const end = Math.min(index + chunkSize, rawData.length);
         for (let i = index; i < end; i++) {
             const item = rawData[i];
@@ -62,6 +65,15 @@ function parseFullTafsirChunked(
 
     // Start processing after a short delay to let the UI settle
     requestAnimationFrame(processChunk);
+
+    return () => {
+        cancelled = true;
+    };
+}
+
+function pickSingleSurah(data: TafsirData, surahNumber?: number | null): TafsirData {
+    if (!surahNumber || !data[surahNumber]) return {};
+    return { [surahNumber]: data[surahNumber] };
 }
 
 export function useTafsirCache(prioritySurah?: number | null) {
@@ -71,6 +83,7 @@ export function useTafsirCache(prioritySurah?: number | null) {
     const loadingRef = useRef(false);
     const abortRef = useRef<AbortController | null>(null);
     const currentTafsirRef = useRef<string>("");
+    const cancelBackgroundParseRef = useRef<(() => void) | null>(null);
 
     const loadTafsirJSON = useCallback(
         async (tafsirId: string, currentSurah?: number | null) => {
@@ -78,12 +91,16 @@ export function useTafsirCache(prioritySurah?: number | null) {
             if (loadingRef.current) {
                 abortRef.current?.abort();
             }
+            // Cancel any background parse for the previous tafsir selection
+            cancelBackgroundParseRef.current?.();
+            cancelBackgroundParseRef.current = null;
 
             currentTafsirRef.current = tafsirId;
 
             // 1) Full cache hit → instant switch, all surahs available
             if (tafsirCache.has(tafsirId)) {
-                setTafsirData(tafsirCache.get(tafsirId)!);
+                const cached = tafsirCache.get(tafsirId)!;
+                setTafsirData(pickSingleSurah(cached, currentSurah));
                 setTafsirLoaded(true);
                 localStorage.setItem("selected-tafsir-id", tafsirId);
                 return;
@@ -98,18 +115,34 @@ export function useTafsirCache(prioritySurah?: number | null) {
             try {
                 let rawData: any[];
 
-                // 2) Check if we already have the raw JSON cached (avoids re-download)
+                // 2) Check if we already have the raw JSON cached (avoids re-download inside the current session)
                 if (rawJsonCache.has(tafsirId)) {
                     rawData = rawJsonCache.get(tafsirId)!;
                 } else {
-                    const response = await fetch(`/data/tafsir_${tafsirId}.json`, {
-                        signal: controller.signal,
-                    });
+                    const cacheName = "tafsir-network-cache-v1";
+                    const url = `/data/tafsir_${tafsirId}.json`;
+                    
+                    try {
+                        const cache = await caches.open(cacheName);
+                        let response = await cache.match(url);
+                        
+                        if (!response) {
+                            response = await fetch(url, { signal: controller.signal });
+                            if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
+                            // Clone before using since body can only be read once
+                            cache.put(url, response.clone());
+                        }
+                        
+                        rawData = await response.json();
+                    } catch (e: any) {
+                        if (e.name === "AbortError") throw e;
+                        // Fallback if Cache API fails
+                        const response = await fetch(url, { signal: controller.signal });
+                        if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
+                        rawData = await response.json();
+                    }
 
-                    if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
-                    rawData = await response.json();
-
-                    // Cache raw JSON for future use
+                    // Cache raw JSON in memory for this session
                     rawJsonCache.set(tafsirId, rawData);
                 }
 
@@ -123,15 +156,17 @@ export function useTafsirCache(prioritySurah?: number | null) {
                         setTafsirData(partialData);
                         setTafsirLoaded(true);
                     }
+                } else {
+                    // No active surah selected yet, but tafsir file is ready.
+                    setTafsirLoaded(true);
                 }
 
                 // 4) BACKGROUND: Parse the full dataset in non-blocking chunks
-                //    This fills in all other surahs silently
-                parseFullTafsirChunked(rawData, (fullData) => {
+                //    This fills the global cache without forcing a huge UI state update.
+                cancelBackgroundParseRef.current = parseFullTafsirChunked(rawData, (fullData) => {
                     // Only update if this tafsir is still the active one
                     if (currentTafsirRef.current === tafsirId) {
                         tafsirCache.set(tafsirId, fullData);
-                        setTafsirData(fullData);
                         setTafsirLoaded(true);
                     }
                 });
@@ -177,6 +212,13 @@ export function useTafsirCache(prioritySurah?: number | null) {
         loadTafsirJSON(selectedTafsir, prioritySurah);
     }, [selectedTafsir, loadTafsirJSON, prioritySurah]);
 
+    useEffect(() => {
+        return () => {
+            abortRef.current?.abort();
+            cancelBackgroundParseRef.current?.();
+        };
+    }, []);
+
     return {
         tafsirData,
         tafsirLoaded,
@@ -185,16 +227,23 @@ export function useTafsirCache(prioritySurah?: number | null) {
         /** Call this when the user selects a new surah to prioritize parsing it first */
         loadForSurah: useCallback(
             (surahNum: number) => {
-                // If full cache exists, no need to reload
-                if (tafsirCache.has(selectedTafsir)) return;
+                // If full cache exists, hydrate only the requested surah into state.
+                if (tafsirCache.has(selectedTafsir)) {
+                    const cached = tafsirCache.get(selectedTafsir)!;
+                    const surahOnly = pickSingleSurah(cached, surahNum);
+                    if (surahOnly[surahNum]) {
+                        setTafsirData(surahOnly);
+                    }
+                    return;
+                }
 
                 // If raw data is available but full parse isn't done yet,
                 // quickly extract just this surah
                 if (rawJsonCache.has(selectedTafsir)) {
                     const rawData = rawJsonCache.get(selectedTafsir)!;
                     const partial = parseSurahTafsir(rawData, surahNum);
-                    // Merge with existing data instead of replacing
-                    setTafsirData((prev) => ({ ...prev, ...partial }));
+                    setTafsirData(partial);
+                    setTafsirLoaded(true);
                 }
             },
             [selectedTafsir]
