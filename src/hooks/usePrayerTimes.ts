@@ -199,21 +199,6 @@ export function usePrayerTimes() {
         const { lat, lng } = JSON.parse(savedLoc);
         setLocation({ lat, lng });
         fetchMobilePrayerTimes(lat, lng, savedCity || undefined);
-      } else if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-          (pos) => {
-            const { latitude, longitude } = pos.coords;
-            setLocation({ lat: latitude, lng: longitude });
-            localStorage.setItem('user-location', JSON.stringify({ lat: latitude, lng: longitude }));
-            fetchMobilePrayerTimes(latitude, longitude, savedCity || undefined);
-          },
-          () => {
-            // Default to Hawler
-            const defLat = 36.19, defLng = 44.01;
-            setLocation({ lat: defLat, lng: defLng });
-            fetchMobilePrayerTimes(defLat, defLng, savedCity || undefined);
-          }
-        );
       } else {
         const defLat = 36.19, defLng = 44.01;
         setLocation({ lat: defLat, lng: defLng });
@@ -366,6 +351,10 @@ export function usePrayerTimes() {
       const lng = location?.lng ?? 44.01;
       fetchMobilePrayerTimes(lat, lng, city);
     },
-    availableCities: Object.keys(prayerDataDB).sort()
+    availableCities: Object.keys(prayerDataDB).sort(),
+    updateLocation: (lat: number, lng: number) => {
+      setLocation({ lat, lng });
+      fetchMobilePrayerTimes(lat, lng, selectedCity || undefined);
+    }
   };
 }

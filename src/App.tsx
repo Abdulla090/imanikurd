@@ -34,7 +34,6 @@ import { OfflineIndicator } from "./components/OfflineIndicator";
 import { PageTransition } from "./components/PageTransition";
 import { AutoScrollToTop } from "./components/AutoScrollToTop";
 import { LoadingScreen } from "./components/LoadingScreen";
-import { LocationPermissionModal } from "./components/LocationPermissionModal";
 
 // Create QueryClient outside component to prevent recreation
 const queryClient = new QueryClient({
@@ -79,7 +78,6 @@ const ChatRedirect = () => {
 
 const App = () => {
   const [initialLoading, setInitialLoading] = useState(true);
-  const [showLocationModal, setShowLocationModal] = useState(false);
 
   useEffect(() => {
     // Hide the initial HTML loader immediately
@@ -88,23 +86,9 @@ const App = () => {
     // Reduced initial app load time for snappier feel
     const timer = setTimeout(() => {
       setInitialLoading(false);
-      // Check if we need to ask for location
-      const stored = localStorage.getItem('user-location');
-      if (!stored) {
-        // Show location modal after a short delay
-        setTimeout(() => setShowLocationModal(true), 300);
-      }
     }, 800); // Reduced from 2000ms to 800ms
     return () => clearTimeout(timer);
   }, []);
-
-  const handleLocationGranted = (coords: { lat: number; lng: number }) => {
-    setShowLocationModal(false);
-  };
-
-  const handleLocationDenied = () => {
-    setShowLocationModal(false);
-  };
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -114,14 +98,6 @@ const App = () => {
 
         {/* Initial Load Screen */}
         <LoadingScreen isLoading={initialLoading} />
-
-        {/* Location Permission Modal */}
-        {showLocationModal && (
-          <LocationPermissionModal
-            onGranted={handleLocationGranted}
-            onDenied={handleLocationDenied}
-          />
-        )}
 
         <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
           <AutoScrollToTop />

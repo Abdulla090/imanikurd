@@ -1,4 +1,5 @@
 
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { Navigation } from "@/components/Navigation";
 import { GeometricPattern } from "@/components/GeometricPattern";
@@ -6,12 +7,19 @@ import { PrayerTimesCard } from "@/components/PrayerTimesCard";
 import QiblaCompass from "@/components/QiblaCompass";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Compass, Clock } from "lucide-react";
+import { LocationPermissionModal } from "@/components/LocationPermissionModal";
 
 export default function PrayerTimesPage() {
+  const [locationVersion, setLocationVersion] = useState(0);
+
   return (
     <div className="relative min-h-screen overflow-hidden">
       <GeometricPattern />
       <Navigation />
+      <LocationPermissionModal 
+         onGranted={() => setLocationVersion(v => v + 1)}
+         onDenied={() => setLocationVersion(v => v + 1)}
+      />
 
       <main className="relative z-10 pt-24 sm:pt-32 pb-16 sm:pb-20 px-2 sm:px-4 md:px-6">
         <div className="w-full max-w-4xl mx-auto">
@@ -50,7 +58,7 @@ export default function PrayerTimesPage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4 }}
               >
-                <PrayerTimesCard />
+                <PrayerTimesCard key={`prayer-${locationVersion}`} />
               </motion.div>
             </TabsContent>
 
@@ -61,7 +69,7 @@ export default function PrayerTimesPage() {
                 transition={{ duration: 0.4 }}
                 className="flex justify-center pt-8"
               >
-                <QiblaCompass />
+                <QiblaCompass key={`qibla-${locationVersion}`} />
               </motion.div>
             </TabsContent>
           </Tabs>

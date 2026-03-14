@@ -121,6 +121,14 @@ export function QiblaIndicator() {
             }
         }
 
+        // If not open, don't ask for location to avoid nagging the user
+        // Just use default or don't calculate Qibla until they interact
+        if (!isOpen) {
+            setUserLocation({ lat: 36.1901, lng: 44.0091 });
+            calculateQibla(36.1901, 44.0091);
+            return;
+        }
+
         if ("geolocation" in navigator) {
             navigator.geolocation.getCurrentPosition(
                 (position) => {
@@ -141,7 +149,7 @@ export function QiblaIndicator() {
                 { timeout: 10000, enableHighAccuracy: true }
             );
         }
-    }, [calculateQibla]);
+    }, [calculateQibla, isOpen]);
 
     useEffect(() => {
         requestLocation();
