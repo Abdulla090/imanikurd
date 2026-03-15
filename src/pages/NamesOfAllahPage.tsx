@@ -19,7 +19,7 @@ export default function NamesOfAllahPage() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        fetch('/data/names_of_allah.json')
+        fetch(`${import.meta.env.BASE_URL}data/names_of_allah.json`)
             .then(res => res.json())
             .then(data => {
                 setNames(data);

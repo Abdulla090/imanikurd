@@ -47,7 +47,7 @@ export default function AzkarPage() {
     useEffect(() => {
         async function loadData() {
             try {
-                const response = await fetch('/data/dhikr_kurdish.json');
+                const response = await fetch(`${import.meta.env.BASE_URL}data/dhikr_kurdish.json`);
                 if (!response.ok) throw new Error("Failed to load data");
                 const json: DhikrData = await response.json();
                 setData(json);

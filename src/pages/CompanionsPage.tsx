@@ -76,7 +76,7 @@ export default function CompanionsPage() {
     const [selectedCompanion, setSelectedCompanion] = useState<Companion | null>(null);
 
     useEffect(() => {
-        fetch('/data/companions.json')
+        fetch(`${import.meta.env.BASE_URL}data/companions.json`)
             .then(res => res.json())
             .then(data => {
                 setCompanions(data);

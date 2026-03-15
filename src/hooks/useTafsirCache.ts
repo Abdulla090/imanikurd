@@ -115,33 +115,43 @@ export function useTafsirCache(prioritySurah?: number | null) {
             try {
                 let rawData: any[];
 
-                // 2) Check if we already have the raw JSON cached (avoids re-download inside the current session)
+                // 2) Check if we already have the raw JSON cached in memory
                 if (rawJsonCache.has(tafsirId)) {
                     rawData = rawJsonCache.get(tafsirId)!;
                 } else {
                     const cacheName = "tafsir-network-cache-v1";
-                    const url = `/data/tafsir_${tafsirId}.json`;
+                    const url = `${import.meta.env.BASE_URL}data/tafsir_${tafsirId}.json`;
+                    
+                    let response;
+                    let usedCacheApi = false;
                     
                     try {
-                        const cache = await caches.open(cacheName);
-                        let response = await cache.match(url);
-                        
-                        if (!response) {
-                            response = await fetch(url, { signal: controller.signal });
-                            if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
-                            // Clone before using since body can only be read once
-                            cache.put(url, response.clone());
+                        if (typeof caches !== 'undefined') {
+                            const cache = await caches.open(cacheName);
+                            response = await cache.match(url);
+                            usedCacheApi = true;
                         }
-                        
-                        rawData = await response.json();
-                    } catch (e: any) {
-                        if (e.name === "AbortError") throw e;
-                        // Fallback if Cache API fails
-                        const response = await fetch(url, { signal: controller.signal });
-                        if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
-                        rawData = await response.json();
+                    } catch (e) {
+                        // Cache API not available or inaccessible, proceed to fetch
                     }
-
+                    
+                    if (!response) {
+                        response = await fetch(url, { signal: controller.signal });
+                        if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
+                        
+                        if (usedCacheApi) {
+                            try {
+                                const cache = await caches.open(cacheName);
+                                // Put clone in background without awaiting; ignore if it rejects
+                                cache.put(url, response.clone()).catch(() => {});
+                            } catch (e) {
+                                // Ignore caching errors
+                            }
+                        }
+                    }
+                    
+                    rawData = await response.json();
+                    
                     // Cache raw JSON in memory for this session
                     rawJsonCache.set(tafsirId, rawData);
                 }

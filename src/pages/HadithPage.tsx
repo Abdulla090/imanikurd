@@ -41,7 +41,7 @@ export default function HadithPage() {
     const loadHadiths = async () => {
       try {
         setLoading(true);
-        const response = await fetch('/data/hadiths_kurdish.json');
+        const response = await fetch(`${import.meta.env.BASE_URL}data/hadiths_kurdish.json`);
         if (!response.ok) throw new Error('Failed to load hadiths');
 
         const data: LocalHadith[] = await response.json();

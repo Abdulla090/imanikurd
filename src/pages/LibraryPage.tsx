@@ -87,7 +87,7 @@ export default function LibraryPage() {
             setLoading(true);
             setError(null);
 
-            const response = await fetch("/data/library.json");
+            const response = await fetch(`${import.meta.env.BASE_URL}data/library.json`);
             if (!response.ok) {
                 throw new Error("Failed to load library data");
             }

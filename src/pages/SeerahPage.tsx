@@ -264,7 +264,7 @@ export default function SeerahPage() {
   const [expandedPeriods, setExpandedPeriods] = useState<Set<number>>(new Set([1]));
 
   useEffect(() => {
-    fetch('/data/seerah.json')
+    fetch(`${import.meta.env.BASE_URL}data/seerah.json`)
       .then(res => res.json())
       .then(data => {
         setSeerahData(data);
