@@ -58,6 +58,35 @@ The application is built using a modern frontend stack to ensure performance, ma
 
 ### Installation
 
+### As an npm package (use anywhere)
+
+Install the `imanikurd` library in any Node.js, React, or bundler project:
+
+```bash
+npm install imanikurd
+```
+
+```javascript
+import {
+  getFullQuran,      // All 6236 ayahs
+  getSurahs,         // 114 surahs
+  calculateQibla,    // Qibla direction
+  getPrayerTimes,    // Kurdistan prayer times
+  getDhikrByCategory,// Dhikr / Azkar
+  getTafsirForAyah,  // 13 Kurdish Tafsirs
+  getHadiths,
+  getNamesOfAllah,
+} from "imanikurd";
+
+const quran = getFullQuran();           // Complete Quran
+const qibla = calculateQibla(36.19, 44.01);
+const times = getPrayerTimes("Hawler");
+```
+
+See [packages/imanikurd/README.md](packages/imanikurd/README.md) for the full API reference.
+
+### Web application (this repo)
+
 1. Clone the repository:
    ```bash
    git clone https://github.com/Abdulla090/imanikurd.git

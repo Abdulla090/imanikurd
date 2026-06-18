@@ -35,3 +35,6 @@ dist-ssr
 
 # Temp
 temp_audio/
+
+# npm package
+packages/imanikurd/node_modules
