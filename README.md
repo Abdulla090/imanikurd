@@ -1,5 +1,9 @@
 # Imani Kurd (ئیمانی کورد)
 
+[![npm version](https://img.shields.io/npm/v/imanikurd.svg)](https://www.npmjs.com/package/imanikurd)
+[![CI](https://github.com/Abdulla090/imanikurd/actions/workflows/ci.yml/badge.svg)](https://github.com/Abdulla090/imanikurd/actions)
+[![license](https://img.shields.io/npm/l/imanikurd.svg)](https://github.com/Abdulla090/imanikurd/blob/main/LICENSE)
+
 A comprehensive Islamic web application tailored for the Kurdish speaking community. It provides a rich set of spiritual tools, educational resources, and daily utilities designed with a modern, fast, and accessible user interface.
 
 ## Table of Contents

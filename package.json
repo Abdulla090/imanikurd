@@ -3,6 +3,9 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "workspaces": [
+    "packages/*"
+  ],
   "engines": {
     "node": "20.x"
   },
@@ -10,6 +13,9 @@
     "dev": "vite",
     "build": "vite build",
     "build:dev": "vite build --mode development",
+    "build:packages": "npm run build -w imanikurd-quran -w imanikurd-prayer -w imanikurd-hadith && npm run build -w imanikurd",
+    "test:packages": "npm run test --workspaces",
+    "typecheck:packages": "npm run typecheck --workspaces",
     "lint": "eslint .",
     "preview": "vite preview"
   },

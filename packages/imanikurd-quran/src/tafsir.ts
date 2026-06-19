@@ -1,4 +1,4 @@
-import { loadData } from "./loadData.js";
+import { loadData, loadDataAsync } from "./loadData.js";
 import type { TafsirEntry, TafsirOption } from "./types.js";
 
 /** All 13 Kurdish Tafsir options available in the package */
@@ -50,6 +50,18 @@ function loadTafsirRaw(tafsirId: string): TafsirEntry[] {
   return entries;
 }
 
+async function loadTafsirRawAsync(tafsirId: string): Promise<TafsirEntry[]> {
+  if (tafsirCache.has(tafsirId)) {
+    return tafsirCache.get(tafsirId)!;
+  }
+
+  const file = getTafsirFile(tafsirId);
+  const raw = await loadDataAsync<Array<{ s: number | string; a: number; t: string }>>(file);
+  const entries = raw.map(normalizeEntry);
+  tafsirCache.set(tafsirId, entries);
+  return entries;
+}
+
 /** Get list of available Tafsir options */
 export function getTafsirOptions(): TafsirOption[] {
   return TAFSIR_OPTIONS;
@@ -58,6 +70,11 @@ export function getTafsirOptions(): TafsirOption[] {
 /** Get full tafsir dataset for a given tafsir id */
 export function getTafsir(tafsirId: string): TafsirEntry[] {
   return loadTafsirRaw(tafsirId);
+}
+
+/** Get full tafsir dataset for a given tafsir id asynchronously */
+export async function getTafsirAsync(tafsirId: string): Promise<TafsirEntry[]> {
+  return loadTafsirRawAsync(tafsirId);
 }
 
 /** Get tafsir text for a specific ayah */
@@ -71,12 +88,40 @@ export function getTafsirForAyah(
   return entry?.t;
 }
 
-/** Get-get all tafsir entries for a surah as a map of ayah number -> text */
+/** Get tafsir text for a specific ayah asynchronously */
+export async function getTafsirForAyahAsync(
+  tafsirId: string,
+  surahNumber: number,
+  ayahNumber: number
+): Promise<string | undefined> {
+  const entries = await loadTafsirRawAsync(tafsirId);
+  const entry = entries.find((e) => e.s === surahNumber && e.a === ayahNumber);
+  return entry?.t;
+}
+
+/** Get all tafsir entries for a surah as a map of ayah number -> text */
 export function getTafsirForSurah(
   tafsirId: string,
   surahNumber: number
 ): Record<number, string> {
   const entries = loadTafsirRaw(tafsirId);
+  const result: Record<number, string> = {};
+
+  for (const entry of entries) {
+    if (entry.s === surahNumber) {
+      result[entry.a] = entry.t;
+    }
+  }
+
+  return result;
+}
+
+/** Get all tafsir entries for a surah as a map of ayah number -> text asynchronously */
+export async function getTafsirForSurahAsync(
+  tafsirId: string,
+  surahNumber: number
+): Promise<Record<number, string>> {
+  const entries = await loadTafsirRawAsync(tafsirId);
   const result: Record<number, string> = {};
 
   for (const entry of entries) {
@@ -96,4 +141,14 @@ export function searchTafsir(tafsirId: string, query: string): TafsirEntry[] {
   return loadTafsirRaw(tafsirId).filter((e) => e.t.includes(normalized));
 }
 
+/** Search tafsir text across all entries of a given tafsir asynchronously */
+export async function searchTafsirAsync(tafsirId: string, query: string): Promise<TafsirEntry[]> {
+  const normalized = query.trim();
+  if (!normalized) return [];
+
+  const entries = await loadTafsirRawAsync(tafsirId);
+  return entries.filter((e) => e.t.includes(normalized));
+}
+
 export type { TafsirEntry, TafsirOption };
+

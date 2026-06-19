@@ -1,5 +1,9 @@
 # imanikurd
 
+[![npm version](https://img.shields.io/npm/v/imanikurd.svg)](https://www.npmjs.com/package/imanikurd)
+[![CI](https://github.com/Abdulla090/imanikurd/actions/workflows/ci.yml/badge.svg)](https://github.com/Abdulla090/imanikurd/actions)
+[![license](https://img.shields.io/npm/l/imanikurd.svg)](https://github.com/Abdulla090/imanikurd/blob/main/LICENSE)
+
 Complete Islamic toolkit for the Kurdish community. Install anywhere with npm and access the full Quran, prayer times, Qibla, dhikr, hadith, tafsir, and more.
 
 ```bash
@@ -87,19 +91,38 @@ const qibla = calculateQibla(36.19, 44.01);
 const times = getPrayerTimes("Duhok");
 ```
 
-## Browser / Bundlers
+## Universal / Browser Support
 
-For browser apps, import JSON data directly:
+All APIs have **Asynchronous** equivalents ending in `Async` (e.g. `getSurahsAsync()`, `getPrayerTimesAsync()`). These async APIs work in both **Node.js** (non-blocking file reads) and **Browser environments** (fetches data on-demand).
+
+### 1. Browser Configuration
+
+Since browser apps don't have filesystem access, the package loads data from a CDN (unpkg) by default. You can customize the base URL or set a custom data loader:
+
+```javascript
+import { setBaseUrl, getSurahsAsync } from "imanikurd";
+
+// Option A: Point to your own asset folder or CDN
+setBaseUrl("https://mycdn.com/imanikurd/data");
+
+// Option B: Set a custom data loader (e.g. dynamic imports or local fetch)
+import { setDataLoader } from "imanikurd";
+setDataLoader(async (filename) => {
+  const response = await fetch(`/data/${filename}`);
+  return response.json();
+});
+
+// Load data asynchronously
+const surahs = await getSurahsAsync();
+```
+
+### 2. Direct JSON Imports (Recommended for small bundles)
+
+For client-side apps, you can import individual JSON datasets directly to save network requests:
 
 ```javascript
 import quran from "imanikurd/data/quran.json";
 import dhikr from "imanikurd/data/dhikr.json";
-```
-
-Or use the API functions (Node.js / SSR):
-
-```javascript
-import { getSurahAyahs, getTafsirForSurah } from "imanikurd";
 ```
 
 ## API Reference
