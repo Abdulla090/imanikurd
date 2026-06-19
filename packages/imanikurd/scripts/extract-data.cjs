@@ -7,12 +7,18 @@ const fs = require("fs");
 const path = require("path");
 
 const ROOT = path.join(__dirname, "..");
-const DATA_DIR = path.join(ROOT, "data");
+const MAIN_DATA_DIR = path.join(ROOT, "data");
+const QURAN_DATA_DIR = path.join(ROOT, "../imanikurd-quran/data");
+const HADITH_DATA_DIR = path.join(ROOT, "../imanikurd-hadith/data");
+const PRAYER_DATA_DIR = path.join(ROOT, "../imanikurd-prayer/data");
 const DB_PATH = path.join(__dirname, "../../../src/assets/noor_db/noor_database_v2.db");
 const PUBLIC_DATA = path.join(__dirname, "../../../public/data");
 const SRC_DATA = path.join(__dirname, "../../../src/data");
 
-if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
+if (!fs.existsSync(MAIN_DATA_DIR)) fs.mkdirSync(MAIN_DATA_DIR, { recursive: true });
+if (!fs.existsSync(QURAN_DATA_DIR)) fs.mkdirSync(QURAN_DATA_DIR, { recursive: true });
+if (!fs.existsSync(HADITH_DATA_DIR)) fs.mkdirSync(HADITH_DATA_DIR, { recursive: true });
+if (!fs.existsSync(PRAYER_DATA_DIR)) fs.mkdirSync(PRAYER_DATA_DIR, { recursive: true });
 
 const db = new Database(DB_PATH);
 
@@ -174,38 +180,38 @@ const quran = {
   ayahs,
 };
 
-fs.writeFileSync(path.join(DATA_DIR, "quran.json"), JSON.stringify(quran));
-console.log(`Saved quran.json (${ayahs.length} ayahs, ${SURAHS_DATA.length} surahs)`);
+fs.writeFileSync(path.join(QURAN_DATA_DIR, "quran.json"), JSON.stringify(quran));
+console.log(`Saved quran.json (${ayahs.length} ayahs, ${SURAHS_DATA.length} surahs) to imanikurd-quran`);
 
-// Copy existing JSON data files
+// Copy existing JSON data files to their respective packages
 const filesToCopy = [
-  { src: path.join(PUBLIC_DATA, "dhikr_kurdish.json"), dest: "dhikr.json" },
-  { src: path.join(PUBLIC_DATA, "hadiths_kurdish.json"), dest: "hadiths.json" },
-  { src: path.join(PUBLIC_DATA, "names_of_allah.json"), dest: "names_of_allah.json" },
-  { src: path.join(PUBLIC_DATA, "companions.json"), dest: "companions.json" },
-  { src: path.join(PUBLIC_DATA, "seerah.json"), dest: "seerah.json" },
-  { src: path.join(PUBLIC_DATA, "library.json"), dest: "library.json" },
-  { src: path.join(SRC_DATA, "prayer_times_db.json"), dest: "prayer_times.json" },
-  { src: path.join(PUBLIC_DATA, "tafsir_rebar.json"), dest: "tafsir_rebar.json" },
-  { src: path.join(PUBLIC_DATA, "tafsir_asan.json"), dest: "tafsir_asan.json" },
-  { src: path.join(PUBLIC_DATA, "tafsir_puxta.json"), dest: "tafsir_puxta.json" },
-  { src: path.join(PUBLIC_DATA, "tafsir_raman.json"), dest: "tafsir_raman.json" },
-  { src: path.join(PUBLIC_DATA, "tafsir_hazhar.json"), dest: "tafsir_hazhar.json" },
-  { src: path.join(PUBLIC_DATA, "tafsir_zhin.json"), dest: "tafsir_zhin.json" },
-  { src: path.join(PUBLIC_DATA, "tafsir_sanahi.json"), dest: "tafsir_sanahi.json" },
-  { src: path.join(PUBLIC_DATA, "tafsir_maisar.json"), dest: "tafsir_maisar.json" },
-  { src: path.join(PUBLIC_DATA, "tafsir_tawhid.json"), dest: "tafsir_tawhid.json" },
-  { src: path.join(PUBLIC_DATA, "tafsir_roshn.json"), dest: "tafsir_roshn.json" },
-  { src: path.join(PUBLIC_DATA, "tafsir_runahi.json"), dest: "tafsir_runahi.json" },
-  { src: path.join(PUBLIC_DATA, "tafsir_mokhtasar.json"), dest: "tafsir_mokhtasar.json" },
-  { src: path.join(PUBLIC_DATA, "tafsir_krd.json"), dest: "tafsir_krd.json" },
-  { src: path.join(PUBLIC_DATA, "tafsir_search.json"), dest: "tafsir_search.json" },
+  { src: path.join(PUBLIC_DATA, "dhikr_kurdish.json"), dest: "dhikr.json", dir: MAIN_DATA_DIR },
+  { src: path.join(PUBLIC_DATA, "hadiths_kurdish.json"), dest: "hadiths.json", dir: HADITH_DATA_DIR },
+  { src: path.join(PUBLIC_DATA, "names_of_allah.json"), dest: "names_of_allah.json", dir: MAIN_DATA_DIR },
+  { src: path.join(PUBLIC_DATA, "companions.json"), dest: "companions.json", dir: MAIN_DATA_DIR },
+  { src: path.join(PUBLIC_DATA, "seerah.json"), dest: "seerah.json", dir: MAIN_DATA_DIR },
+  { src: path.join(PUBLIC_DATA, "library.json"), dest: "library.json", dir: MAIN_DATA_DIR },
+  { src: path.join(SRC_DATA, "prayer_times_db.json"), dest: "prayer_times.json", dir: PRAYER_DATA_DIR },
+  { src: path.join(PUBLIC_DATA, "tafsir_rebar.json"), dest: "tafsir_rebar.json", dir: QURAN_DATA_DIR },
+  { src: path.join(PUBLIC_DATA, "tafsir_asan.json"), dest: "tafsir_asan.json", dir: QURAN_DATA_DIR },
+  { src: path.join(PUBLIC_DATA, "tafsir_puxta.json"), dest: "tafsir_puxta.json", dir: QURAN_DATA_DIR },
+  { src: path.join(PUBLIC_DATA, "tafsir_raman.json"), dest: "tafsir_raman.json", dir: QURAN_DATA_DIR },
+  { src: path.join(PUBLIC_DATA, "tafsir_hazhar.json"), dest: "tafsir_hazhar.json", dir: QURAN_DATA_DIR },
+  { src: path.join(PUBLIC_DATA, "tafsir_zhin.json"), dest: "tafsir_zhin.json", dir: QURAN_DATA_DIR },
+  { src: path.join(PUBLIC_DATA, "tafsir_sanahi.json"), dest: "tafsir_sanahi.json", dir: QURAN_DATA_DIR },
+  { src: path.join(PUBLIC_DATA, "tafsir_maisar.json"), dest: "tafsir_maisar.json", dir: QURAN_DATA_DIR },
+  { src: path.join(PUBLIC_DATA, "tafsir_tawhid.json"), dest: "tafsir_tawhid.json", dir: QURAN_DATA_DIR },
+  { src: path.join(PUBLIC_DATA, "tafsir_roshn.json"), dest: "tafsir_roshn.json", dir: QURAN_DATA_DIR },
+  { src: path.join(PUBLIC_DATA, "tafsir_runahi.json"), dest: "tafsir_runahi.json", dir: QURAN_DATA_DIR },
+  { src: path.join(PUBLIC_DATA, "tafsir_mokhtasar.json"), dest: "tafsir_mokhtasar.json", dir: QURAN_DATA_DIR },
+  { src: path.join(PUBLIC_DATA, "tafsir_krd.json"), dest: "tafsir_krd.json", dir: QURAN_DATA_DIR },
+  { src: path.join(PUBLIC_DATA, "tafsir_search.json"), dest: "tafsir_search.json", dir: QURAN_DATA_DIR },
 ];
 
-for (const { src, dest } of filesToCopy) {
+for (const { src, dest, dir } of filesToCopy) {
   if (fs.existsSync(src)) {
-    fs.copyFileSync(src, path.join(DATA_DIR, dest));
-    console.log(`Copied ${dest}`);
+    fs.copyFileSync(src, path.join(dir, dest));
+    console.log(`Copied ${dest} to ${path.basename(path.dirname(dir))}/${path.basename(dir)}`);
   } else {
     console.warn(`Missing: ${src}`);
   }

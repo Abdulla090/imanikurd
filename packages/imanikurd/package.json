@@ -19,7 +19,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Abdulla090/imanikurd.git",
+    "url": "git+https://github.com/Abdulla090/imanikurd.git",
     "directory": "packages/imanikurd"
   },
   "homepage": "https://github.com/Abdulla090/imanikurd#readme",
@@ -53,6 +53,11 @@
     "extract-data": "node scripts/extract-data.cjs",
     "prepublishOnly": "npm run extract-data && npm run build",
     "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "imanikurd-hadith": "^1.0.0",
+    "imanikurd-prayer": "^1.0.0",
+    "imanikurd-quran": "^1.0.0"
   },
   "engines": {
     "node": ">=18"

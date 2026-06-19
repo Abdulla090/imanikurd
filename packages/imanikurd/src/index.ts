@@ -1,4 +1,4 @@
-// Quran — complete 6236 ayahs, 114 surahs
+// Quran & Tafsir & Audio — imported from imanikurd-quran
 export {
   getQuranMetadata,
   getSurahs,
@@ -11,31 +11,32 @@ export {
   searchQuran,
   getTotalAyahCount,
   attachTafsir,
-} from "./quran.js";
-export type { Ayah, AyahWithTafsir, QuranData, Surah } from "./quran.js";
-
-// Tafsir — 13 Kurdish translations
-export {
   TAFSIR_OPTIONS,
   getTafsirOptions,
   getTafsir,
   getTafsirForAyah,
   getTafsirForSurah,
   searchTafsir,
-} from "./tafsir.js";
-export type { TafsirEntry, TafsirOption } from "./tafsir.js";
+  QARI_OPTIONS,
+  getQariOptions,
+  getRecitationUrl,
+  getQari,
+} from "imanikurd-quran";
+export type {
+  Ayah,
+  AyahWithTafsir,
+  QuranData,
+  Surah,
+  TafsirEntry,
+  TafsirOption,
+  Qari,
+} from "imanikurd-quran";
 
-// Qibla direction
-export {
-  KAABA_COORDINATES,
-  calculateQibla,
-  getQibla,
-  isFacingQibla,
-  getDistanceToKaaba,
-  getKaabaCoordinates,
-} from "./qibla.js";
+// Hadith — imported from imanikurd-hadith
+export { getHadiths, getHadith, searchHadiths, getHadithCount } from "imanikurd-hadith";
+export type { Hadith } from "imanikurd-hadith";
 
-// Prayer times for Kurdistan cities
+// Prayer times, Cities, & Qibla — imported from imanikurd-prayer
 export {
   getPrayerCities,
   getPrayerTimes,
@@ -46,22 +47,25 @@ export {
   getNextPrayer,
   getPrayerTimesByLocation,
   KURDISTAN_CITIES,
-} from "./prayer.js";
+  KAABA_COORDINATES,
+  calculateQibla,
+  getQibla,
+  isFacingQibla,
+  getDistanceToKaaba,
+  getKaabaCoordinates,
+  getCityByCoordinates,
+  getCityDisplayName,
+  getCity,
+} from "imanikurd-prayer";
 export type {
   DayPrayerRecord,
   NextPrayer,
   PrayerTimings,
   PrayerTimesData,
-} from "./prayer.js";
+  City,
+} from "imanikurd-prayer";
 
-// Cities
-export {
-  getCityByCoordinates,
-  getCityDisplayName,
-  getCity,
-} from "./cities.js";
-export type { City } from "./cities.js";
-
+// Remaining lightweight features kept in the main package
 // Dhikr / Azkar
 export {
   getDhikrCategories,
@@ -72,10 +76,6 @@ export {
   getDhikrCategoryWithItems,
 } from "./dhikr.js";
 export type { DhikrCategory, DhikrData, DhikrItem } from "./dhikr.js";
-
-// Hadith
-export { getHadiths, getHadith, searchHadiths, getHadithCount } from "./hadith.js";
-export type { Hadith } from "./hadith.js";
 
 // Names of Allah
 export { getNamesOfAllah, getNameOfAllah, searchNamesOfAllah } from "./names.js";
@@ -92,10 +92,6 @@ export type { SeerahEntry } from "./seerah.js";
 // Library
 export { getLibrary, getLibraryItem, searchLibrary } from "./library.js";
 export type { LibraryItem } from "./library.js";
-
-// Audio recitations
-export { QARI_OPTIONS, getQariOptions, getRecitationUrl, getQari } from "./audio.js";
-export type { Qari } from "./audio.js";
 
 // Utilities
 export { loadData, clearDataCache, getDataFilePath } from "./loadData.js";
