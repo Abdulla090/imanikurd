@@ -1,6 +1,6 @@
 {
   "name": "imanikurd",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Complete Islamic toolkit for Kurdish community — full Quran (6236 ayahs), 13 Kurdish Tafsirs, Qibla, prayer times, dhikr, hadith, and more",
   "keywords": [
     "islam",
@@ -56,9 +56,9 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "imanikurd-hadith": "^1.1.0",
-    "imanikurd-prayer": "^1.1.0",
-    "imanikurd-quran": "^1.1.0"
+    "imanikurd-hadith": "^1.1.1",
+    "imanikurd-prayer": "^1.1.1",
+    "imanikurd-quran": "^1.1.1"
   },
   "engines": {
     "node": ">=18"

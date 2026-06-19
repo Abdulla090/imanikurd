@@ -169,4 +169,4 @@ export type { Coordinates, QiblaResult } from "./types.js";
 
 /** Package version info */
 export const PACKAGE_NAME = "imanikurd";
-export const PACKAGE_VERSION = "1.1.0";
+export const PACKAGE_VERSION = "1.1.1";
