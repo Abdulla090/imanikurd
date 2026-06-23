@@ -1,0 +1,3 @@
+# Re-include synced data assets for pub.dev (gitignored at repo root).
+!assets/data/
+!assets/data/**
