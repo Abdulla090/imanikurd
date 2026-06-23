@@ -1,0 +1,71 @@
+{
+  "name": "imanikurd-react-native",
+  "version": "1.1.1",
+  "description": "React Native bindings for imanikurd — Kurdish Islamic toolkit with bundled offline data assets",
+  "keywords": [
+    "react-native",
+    "islam",
+    "quran",
+    "kurdish",
+    "kurdistan",
+    "qibla",
+    "prayer-times",
+    "imanikurd"
+  ],
+  "author": "Abdulla090",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Abdulla090/imanikurd.git",
+    "directory": "packages/imanikurd-react-native"
+  },
+  "homepage": "https://github.com/Abdulla090/imanikurd#readme",
+  "bugs": {
+    "url": "https://github.com/Abdulla090/imanikurd/issues"
+  },
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "react-native": "./dist/index.js",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./data/*": "./data/*"
+  },
+  "files": [
+    "dist",
+    "data",
+    "react-native.config.js",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "prepublishOnly": "node ../../scripts/sync-package-data.cjs && npm run build",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "peerDependencies": {
+    "react-native": ">=0.72.0"
+  },
+  "dependencies": {
+    "imanikurd": "^1.1.1"
+  },
+  "devDependencies": {
+    "react-native": "^0.76.0",
+    "tsup": "^8.4.0",
+    "typescript": "^5.8.3",
+    "vitest": "^1.6.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

@@ -1,6 +1,7 @@
 # Imani Kurd (ئیمانی کورد)
 
 [![npm version](https://img.shields.io/npm/v/imanikurd.svg)](https://www.npmjs.com/package/imanikurd)
+[![pub package](https://img.shields.io/pub/v/imanikurd.svg)](https://pub.dev/packages/imanikurd)
 [![CI](https://github.com/Abdulla090/imanikurd/actions/workflows/ci.yml/badge.svg)](https://github.com/Abdulla090/imanikurd/actions)
 [![license](https://img.shields.io/npm/l/imanikurd.svg)](https://github.com/Abdulla090/imanikurd/blob/main/LICENSE)
 
@@ -88,6 +89,37 @@ const times = getPrayerTimes("Hawler");
 ```
 
 See [packages/imanikurd/README.md](packages/imanikurd/README.md) for the full API reference.
+
+### Flutter (pub.dev)
+
+```bash
+flutter pub add imanikurd
+```
+
+```dart
+import 'package:imanikurd/imanikurd.dart';
+
+final quran = await getFullQuran();
+final qibla = calculateQibla(36.19, 44.01);
+final times = await getPrayerTimes('Hawler');
+```
+
+See [packages/imanikurd_flutter/README.md](packages/imanikurd_flutter/README.md).
+
+### React Native (npm)
+
+```bash
+npm install imanikurd-react-native
+```
+
+```typescript
+import { setupImanikurdRemote, getFullQuranAsync, calculateQibla } from "imanikurd-react-native";
+
+setupImanikurdRemote();
+const quran = await getFullQuranAsync();
+```
+
+See [packages/imanikurd-react-native/README.md](packages/imanikurd-react-native/README.md).
 
 ### Web application (this repo)
 

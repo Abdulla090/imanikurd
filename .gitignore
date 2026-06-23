@@ -38,3 +38,12 @@ temp_audio/
 
 # npm package
 packages/imanikurd/node_modules
+
+# Synced platform data (generated from packages/imanikurd/data)
+packages/imanikurd_flutter/assets/data/
+packages/imanikurd-react-native/data/
+
+# Flutter/Dart
+packages/imanikurd_flutter/.dart_tool/
+packages/imanikurd_flutter/build/
+packages/imanikurd_flutter/.flutter-plugins-dependencies

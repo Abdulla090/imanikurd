@@ -1,0 +1,42 @@
+name: Publish React Native (npm)
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+          registry-url: https://registry.npmjs.org
+          cache: npm
+
+      - name: Sync data assets
+        run: node scripts/sync-package-data.cjs
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build packages
+        run: |
+          npm run build -w imanikurd-quran -w imanikurd-prayer -w imanikurd-hadith
+          npm run build -w imanikurd
+          npm run build -w imanikurd-react-native
+
+      - name: Publish imanikurd-react-native
+        if: github.event_name == 'release' || github.event_name == 'workflow_dispatch'
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          if [ -z "$NODE_AUTH_TOKEN" ]; then
+            echo "NPM_TOKEN secret not set — skipping publish."
+            exit 0
+          fi
+          npm publish -w imanikurd-react-native --access public

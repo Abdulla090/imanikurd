@@ -34,3 +34,29 @@ jobs:
 
     - name: Run tests
       run: npm run test:packages
+
+  flutter:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - uses: subosito/flutter-action@v2
+      with:
+        channel: stable
+        cache: true
+
+    - name: Sync Flutter data assets
+      run: node scripts/sync-package-data.cjs
+
+    - name: Install Flutter dependencies
+      working-directory: packages/imanikurd_flutter
+      run: flutter pub get
+
+    - name: Analyze Flutter package
+      working-directory: packages/imanikurd_flutter
+      run: dart analyze
+
+    - name: Test Flutter package
+      working-directory: packages/imanikurd_flutter
+      run: flutter test

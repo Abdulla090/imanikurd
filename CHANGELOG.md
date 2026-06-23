@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.2.0] - 2026-06-23
+
+### Added
+- Flutter/Dart package (`packages/imanikurd_flutter`) for [pub.dev](https://pub.dev/packages/imanikurd).
+- React Native package (`packages/imanikurd-react-native`) for npm.
+- Data sync script (`scripts/sync-package-data.cjs`) and publish CI workflows.
+
 ## [1.1.0] - 2026-06-19
 
 ### Added
